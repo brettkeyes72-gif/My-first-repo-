@@ -189,32 +189,72 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
 #camera-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .camera-frame {
   position: absolute;
-  inset: 7% 14%;
-  border: 2px dashed rgba(255, 255, 255, 0.85);
-  border-radius: 10px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  inset: 6% 12%;
+  border: 3px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
   pointer-events: none;
+  transition: border-color 0.2s;
 }
-.camera-frame span {
-  margin-top: -1px;
+.camera-wrap.is-level .camera-frame { border-style: solid; border-color: var(--lime); }
+.frame-label {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 4px 10px;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 0.75rem;
+  white-space: nowrap;
   border-radius: 0 0 6px 6px;
+}
+/* Line to put the middle finger and card on, so both measurements run
+   straight up the photo */
+.center-line {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 50%;
+  border-left: 2px dashed rgba(255, 255, 255, 0.7);
+}
+.center-label {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+.capture-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 0 0 9px 9px;
+}
+#capture-progress {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+  transform: scaleX(0);
+  transform-origin: left;
 }
 .level {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 64px;
-  height: 64px;
-  margin: -32px 0 0 -32px;
+  width: 96px;
+  height: 96px;
+  margin: -48px 0 0 -48px;
   border-radius: 50%;
-  border: 3px solid var(--rust);
-  background: rgba(0, 0, 0, 0.25);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.2);
   pointer-events: none;
 }
 .level::before {
@@ -223,25 +263,25 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.85);
 }
 .level-bubble {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
   border-radius: 50%;
   background: #fff;
-  transition: transform 0.08s linear;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
-.level.is-level { border-color: var(--lime); }
-.level.is-level .level-bubble { background: var(--lime); }
+.camera-wrap.is-level .level { border-color: var(--lime); }
+.camera-wrap.is-level .level-bubble { background: var(--lime); }
 .camera-status { margin: 12px 0 0; text-align: center; color: var(--head); font-weight: 500; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 

@@ -6,8 +6,9 @@ Everything runs in the browser. Photos are never uploaded anywhere, and the card
 
 How it works:
 
-- **Camera:** the in-app camera shows a frame to fit the hand and card in, and a level that only enables the shutter when the phone is held flat. People can also pick an existing photo.
-- **Marking:** pinch to zoom, drag with one finger to pan, and a zoom circle while dragging. Both measurement lines are kept within 15° of vertical, so the card's long edge and the hand should point up the photo.
+- **Camera:** the in-app camera shows a frame with a center line for the middle finger and card. The frame turns green when the phone is flat (within 5°, smoothed), and the photo takes itself after 1.2 seconds of holding level. People can also tap the shutter or pick an existing photo.
+- **Marking:** pinch to zoom, drag with one finger to pan, and a zoom circle while dragging. Both measurement lines are locked vertical, so the card and hand should be lined up with the photo's center line.
+- **Hand length** runs from the tip of the longest finger to the wrist crease closest to the palm (the distal wrist crease).
 
 ## Files
 

@@ -30,9 +30,9 @@
 
       <h2>Photo checklist</h2>
       <ol class="tips">
-        <li>Lay your <strong>dominant hand palm up</strong> on a table, fingers together and pointing to the top of the photo, so your wrist crease shows.</li>
-        <li><strong>Rest the card or coin on your palm</strong>, flat, so it's at the same height as your hand. Point the card's long edge toward your fingers.</li>
-        <li>Hold the phone <strong>flat, straight above</strong> your hand at about arm's length (at least 40 cm / 16 in). The camera's level will tell you when it's flat.</li>
+        <li>Lay your <strong>dominant hand palm up</strong> on a table, fingers together and pointing straight up the photo, so your wrist creases show.</li>
+        <li><strong>Rest the card or coin on your palm</strong>, flat, so it's at the same height as your hand. Line the card's long edge up with your middle finger.</li>
+        <li>Hold the phone <strong>flat, straight above</strong> your hand at about arm's length (at least 40 cm / 16 in). The frame turns green when the phone is flat, and the photo takes itself.</li>
       </ol>
 
       <button class="btn primary file-btn" id="camera-btn" type="button">Open camera</button>
@@ -46,7 +46,12 @@
     <section class="screen hidden" id="screen-camera">
       <div class="camera-wrap" id="camera-wrap">
         <video id="camera-video" playsinline muted autoplay></video>
-        <div class="camera-frame" aria-hidden="true"><span>Fit your hand and card inside the frame</span></div>
+        <div class="camera-frame" aria-hidden="true">
+          <span class="frame-label">Fit your hand and card inside the frame</span>
+          <span class="center-line"></span>
+          <span class="center-label">Middle finger and card on this line</span>
+          <span class="capture-bar"><span id="capture-progress"></span></span>
+        </div>
         <div class="level hidden" id="level" aria-hidden="true"><span class="level-bubble" id="level-bubble"></span></div>
       </div>
       <p class="camera-status" id="camera-status">Starting camera…</p>
@@ -96,10 +101,10 @@
           </thead>
           <tbody id="size-rows"></tbody>
         </table>
-        <p class="chart-caption">Hand length is measured from the crease of your wrist to the tip of your longest finger.</p>
+        <p class="chart-caption">Hand length is measured from the wrist crease closest to your palm to the tip of your longest finger.</p>
       </div>
 
-      <p class="disclaimer">This is an estimate from a photo. If it doesn't look right, tap Adjust markers and check they sit exactly on the card's ends, your wrist crease and your fingertip.</p>
+      <p class="disclaimer">This is an estimate from a photo. If it doesn't look right, tap Adjust markers and check they sit exactly on the card's edges, your fingertip and the wrist crease closest to your palm.</p>
       <div class="actions">
         <button class="btn" id="redo-btn">Adjust markers</button>
         <button class="btn primary" id="restart-btn">Start over</button>

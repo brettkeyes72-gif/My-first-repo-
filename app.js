@@ -9,7 +9,7 @@ const REFERENCES = [
     name: 'Any card the size of a credit card',
     detail: 'A gift card, hotel key, loyalty or library card works best. We blur the card as soon as you mark it.',
     mm: 85.6,
-    markHelp: 'Drag the two markers to the top and bottom ends of the card\'s long edge, right on its outer edges. Pinch to zoom for precision.',
+    markHelp: 'Drag the markers to the top and bottom edges of the card. The line stays straight up and down. Pinch to zoom for precision.',
   },
   {
     id: 'quarter',
@@ -17,7 +17,7 @@ const REFERENCES = [
     name: 'US quarter',
     detail: '25¢ coin',
     mm: 24.26,
-    markHelp: 'Drag the two markers to the top and bottom outer edges of the coin, straight across the middle. Pinch to zoom for precision.',
+    markHelp: 'Drag the markers to the top and bottom edges of the coin, through its middle. The line stays straight up and down. Pinch to zoom for precision.',
   },
   {
     id: 'penny',
@@ -56,9 +56,13 @@ const state = {
   original: null, // offscreen canvas holding the (downscaled) photo
   image: null, // what's shown: the original, or a copy with the card blurred
   stepIndex: 0,
-  points: {}, // step id -> [{x, y, placed}, {x, y, placed}] in image pixels
+  points: {}, // step id -> [{x, y}, {x, y}] in image pixels
 };
 
+// Both lines are locked vertical: the card and hand are lined up with the
+// photo's center line, and a slanted line overstates length (15 degrees adds
+// about 3.5%). If the hand and card are both rotated a little, measuring
+// both straight up and down inflates them equally, so the ratio holds.
 const STEPS = [
   {
     id: 'reference',
@@ -66,18 +70,15 @@ const STEPS = [
     help: () => state.reference.markHelp,
     color: '#c16452',
     start: [[0.5, 0.62], [0.5, 0.42]],
-    // The card's long edge points up the photo, along the hand.
-    maxTiltDeg: 15,
+    vertical: true,
   },
   {
     id: 'length',
     title: () => 'Mark your hand length',
-    help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your longest finger.',
+    help: () => 'Drag one marker to the tip of your longest finger and the other to the wrist crease closest to your palm, where your palm ends. Most wrists have two or three creases; use the top one.',
     color: '#b4cc24',
     start: [[0.5, 0.75], [0.5, 0.2]],
-    // Hand length is measured straight along the hand, which points up the
-    // photo. Stop the line drifting sideways while zoomed in.
-    maxTiltDeg: 15,
+    vertical: true,
   },
 ];
 
@@ -147,10 +148,17 @@ $('photo-input').addEventListener('change', (event) => {
 
 // ---------- Camera ----------
 
-// The phone counts as flat when tilted less than this in any direction.
-const LEVEL_TOLERANCE_DEG = 3;
+// The phone counts as flat when tilted less than this. With the card on the
+// palm, 5 degrees changes the measurement by well under 1%. It must tilt past
+// the exit angle to count as not flat again, so the state doesn't flicker.
+const LEVEL_ENTER_DEG = 5;
+const LEVEL_EXIT_DEG = 6.5;
+// Smoothing for the motion sensor, so hand shake doesn't swing the bubble.
+const LEVEL_SMOOTHING = 0.15;
+// Take the photo automatically after the phone has been level this long.
+const AUTO_CAPTURE_MS = 1200;
 
-const camera = { stream: null, levelSeen: false, isLevel: false };
+const camera = { stream: null, levelSeen: false, isLevel: false, beta: 0, gamma: 0, levelSince: 0, timer: null };
 const video = $('camera-video');
 
 $('camera-btn').addEventListener('click', async () => {
@@ -167,6 +175,8 @@ $('camera-btn').addEventListener('click', async () => {
 async function startCamera() {
   camera.levelSeen = false;
   camera.isLevel = false;
+  camera.levelSince = 0;
+  setCaptureProgress(0);
   $('level').classList.add('hidden');
   updateShutter();
   setCameraStatus('Starting camera…');
@@ -191,7 +201,7 @@ async function startCamera() {
   // the photo anyway.
   setTimeout(() => {
     if (camera.stream && !camera.levelSeen) {
-      setCameraStatus("Hold the phone flat, straight above your hand, then take the photo.");
+      setCameraStatus('Hold the phone flat, straight above your hand, then take the photo.');
       updateShutter();
     }
   }, 1500);
@@ -205,6 +215,7 @@ video.addEventListener('loadedmetadata', () => {
 });
 
 function stopCamera() {
+  cancelAnimationFrame(camera.timer);
   window.removeEventListener('deviceorientation', onOrientation);
   if (camera.stream) camera.stream.getTracks().forEach((t) => t.stop());
   camera.stream = null;
@@ -215,23 +226,56 @@ function stopCamera() {
 // phone lies flat, which is how it is held when pointing straight down.
 function onOrientation(event) {
   if (event.beta === null || event.gamma === null) return;
+  if (!camera.levelSeen) {
+    camera.beta = event.beta;
+    camera.gamma = event.gamma;
+  }
   camera.levelSeen = true;
   $('level').classList.remove('hidden');
-  const tilt = Math.hypot(event.beta, event.gamma);
-  camera.isLevel = tilt <= LEVEL_TOLERANCE_DEG;
+  camera.beta += (event.beta - camera.beta) * LEVEL_SMOOTHING;
+  camera.gamma += (event.gamma - camera.gamma) * LEVEL_SMOOTHING;
+  const tilt = Math.hypot(camera.beta, camera.gamma);
+  const wasLevel = camera.isLevel;
+  camera.isLevel = tilt <= (wasLevel ? LEVEL_EXIT_DEG : LEVEL_ENTER_DEG);
 
   // Bubble moves like a spirit level: away from the low side, reaching the
   // edge of the ring at 15 degrees.
   const range = 15;
-  const ringRadius = 26;
+  const ringRadius = 40;
   const reach = Math.min(tilt, range) / Math.max(tilt, 0.001);
-  const bx = (event.gamma * reach * ringRadius) / range;
-  const by = (event.beta * reach * ringRadius) / range;
+  const bx = (camera.gamma * reach * ringRadius) / range;
+  const by = (camera.beta * reach * ringRadius) / range;
   $('level-bubble').style.transform = `translate(${-bx}px, ${-by}px)`;
-  $('level').classList.toggle('is-level', camera.isLevel);
+  $('camera-wrap').classList.toggle('is-level', camera.isLevel);
 
-  setCameraStatus(camera.isLevel ? 'Level. Hold steady and take the photo.' : 'Tilt the phone until the bubble is in the center.');
+  if (camera.isLevel && !wasLevel) startAutoCapture();
+  if (!camera.isLevel && wasLevel) stopAutoCapture();
+  if (!camera.isLevel) setCameraStatus('Hold the phone flat. The frame turns green when it is.');
   updateShutter();
+}
+
+// While the phone stays level, fill the bar along the frame, then take the
+// photo. Tilting away cancels it.
+function startAutoCapture() {
+  camera.levelSince = performance.now();
+  setCameraStatus('Hold still…');
+  const tick = () => {
+    if (!camera.isLevel || !camera.stream) return;
+    const progress = (performance.now() - camera.levelSince) / AUTO_CAPTURE_MS;
+    setCaptureProgress(progress);
+    if (progress >= 1) takePhoto();
+    else camera.timer = requestAnimationFrame(tick);
+  };
+  camera.timer = requestAnimationFrame(tick);
+}
+
+function stopAutoCapture() {
+  cancelAnimationFrame(camera.timer);
+  setCaptureProgress(0);
+}
+
+function setCaptureProgress(fraction) {
+  $('capture-progress').style.transform = `scaleX(${clamp(fraction, 0, 1)})`;
 }
 
 function updateShutter() {
@@ -243,8 +287,11 @@ function setCameraStatus(text) {
   $('camera-status').textContent = text;
 }
 
-$('shutter-btn').addEventListener('click', () => {
+$('shutter-btn').addEventListener('click', () => takePhoto());
+
+function takePhoto() {
   if (!video.videoWidth) return;
+  stopAutoCapture();
   const w = video.videoWidth;
   const h = video.videoHeight;
   const frame = document.createElement('canvas');
@@ -253,7 +300,7 @@ $('shutter-btn').addEventListener('click', () => {
   frame.getContext('2d').drawImage(video, 0, 0, w, h);
   stopCamera();
   useImage(frame, w, h);
-});
+}
 
 $('camera-cancel').addEventListener('click', () => {
   stopCamera();
@@ -314,7 +361,7 @@ function draw() {
   ctx.drawImage(state.image, view.tx, view.ty, state.image.width * k, state.image.height * k);
 
   const step = currentStep();
-  if (gesture.mode === 'marker' && step.maxTiltDeg) drawGuide(state.points[step.id]);
+  if (gesture.mode === 'marker' && step.vertical) drawGuide(state.points[step.id]);
 
   STEPS.forEach((s, i) => {
     const pts = state.points[s.id];
@@ -432,7 +479,9 @@ canvas.addEventListener('pointerdown', (event) => {
 
   if (pointers.size === 2) {
     // Undo any marker move the first finger started, then pinch.
-    if (gesture.mode === 'marker') Object.assign(gesture.marker, gesture.markerStart);
+    if (gesture.mode === 'marker') {
+      state.points[currentStep().id].forEach((p, i) => Object.assign(p, gesture.startPts[i]));
+    }
     startPinch();
     return;
   }
@@ -454,7 +503,7 @@ canvas.addEventListener('pointerdown', (event) => {
       mode: 'marker',
       index: nearest,
       marker: pts[nearest],
-      markerStart: { ...pts[nearest] },
+      startPts: pts.map((p) => ({ ...p })),
       offset: { x: c.x - pos.x, y: c.y - pos.y },
     };
     moveMarker(pos);
@@ -546,39 +595,10 @@ function moveMarker(pos) {
   const target = toImage({ x: pos.x + gesture.offset.x, y: pos.y + gesture.offset.y });
   p.x = clamp(target.x, 0, state.image.width);
   p.y = clamp(target.y, 0, state.image.height);
-  if (step.maxTiltDeg) {
-    const other = pts[1 - gesture.index];
-    // A marker the user hasn't placed yet slides sideways to follow, so the
-    // line can be moved anywhere. A placed marker stays put and the one being
-    // dragged is held to the angle instead.
-    if (other.placed) limitTilt(p, other, step.maxTiltDeg);
-    else followTilt(other, p, step.maxTiltDeg);
-  }
-  p.placed = true;
+  // Moving a marker sideways moves the whole line, keeping it vertical.
+  if (step.vertical) pts[1 - gesture.index].x = p.x;
   draw();
   drawLoupe(p);
-}
-
-// Keep the line from `anchor` to `p` within `maxDeg` of vertical, keeping its
-// length, by rotating `p` around `anchor`.
-function limitTilt(p, anchor, maxDeg) {
-  const dx = p.x - anchor.x;
-  const dy = p.y - anchor.y;
-  const len = Math.hypot(dx, dy);
-  const max = (maxDeg * Math.PI) / 180;
-  if (len === 0 || Math.atan2(Math.abs(dx), Math.abs(dy)) <= max) return;
-  p.x = anchor.x + Math.sign(dx) * len * Math.sin(max);
-  p.y = anchor.y + (dy < 0 ? -1 : 1) * len * Math.cos(max);
-  p.x = clamp(p.x, 0, state.image.width);
-  p.y = clamp(p.y, 0, state.image.height);
-}
-
-// Move `follower` sideways just enough to keep the line from `p` within
-// `maxDeg` of vertical.
-function followTilt(follower, p, maxDeg) {
-  const maxDx = Math.abs(follower.y - p.y) * Math.tan((maxDeg * Math.PI) / 180);
-  const dx = follower.x - p.x;
-  if (Math.abs(dx) > maxDx) follower.x = p.x + Math.sign(dx) * maxDx;
 }
 
 // Magnified view above the finger, for precise placement on small screens.
