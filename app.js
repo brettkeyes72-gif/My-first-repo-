@@ -29,20 +29,23 @@ const REFERENCES = [
   },
 ];
 
-// Glove sizes by hand circumference around the knuckles (inches).
-// Replace these with your own brand's chart if it differs.
+// TRUCK glove sizing chart: hand length (tip of longest finger to crease of
+// wrist) for each glove size, from truckgloves.com.
 const SIZE_CHART = [
-  { label: 'XS', maxCircumference: 6.75, maxLength: 6.3 },
-  { label: 'S', maxCircumference: 7.75, maxLength: 6.9 },
-  { label: 'M', maxCircumference: 8.75, maxLength: 7.4 },
-  { label: 'L', maxCircumference: 9.75, maxLength: 7.9 },
-  { label: 'XL', maxCircumference: 10.75, maxLength: 8.4 },
-  { label: 'XXL', maxCircumference: Infinity, maxLength: Infinity },
+  { label: '3', mm: 120 },
+  { label: '4', mm: 134 },
+  { label: '5', mm: 146 },
+  { label: '6', mm: 160 },
+  { label: '7', mm: 171 },
+  { label: '8', mm: 182 },
+  { label: '9', mm: 192 },
+  { label: '10', mm: 204 },
+  { label: '11', mm: 215 },
 ];
 
-// A photo only shows palm width, so circumference is estimated from it.
-// Circumference is roughly 2.5x the palm width once hand thickness is included.
-const CIRCUMFERENCE_PER_WIDTH = 2.5;
+// How close (as a share of the gap to the next size) a hand has to be to a
+// size before we call it that size rather than "between sizes".
+const SNAP_TO_SIZE = 0.25;
 const MM_PER_INCH = 25.4;
 const MAX_IMAGE_SIDE = 2000;
 
@@ -62,19 +65,11 @@ const STEPS = [
     start: [[0.35, 0.8], [0.65, 0.8]],
   },
   {
-    id: 'width',
-    title: () => 'Mark your palm width',
-    help: () => 'Drag the markers to the outer edges of your hand, across the knuckles (not including your thumb).',
-    color: '#ffc20e',
-    start: [[0.3, 0.45], [0.7, 0.45]],
-  },
-  {
     id: 'length',
-    title: () => 'Mark your hand length (optional)',
-    help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your middle finger.',
-    color: '#ff6a13',
+    title: () => 'Mark your hand length',
+    help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your longest finger.',
+    color: '#ffc20e',
     start: [[0.5, 0.75], [0.5, 0.2]],
-    optional: true,
   },
 ];
 
@@ -354,12 +349,18 @@ function distance(pts) {
   return Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
 }
 
-function sizeIndexFor(value, key) {
-  return SIZE_CHART.findIndex((row) => value < row[key]);
+// Where a hand length falls on the chart, as a fractional index:
+// 0 = size 3 exactly, 1 = size 4 exactly, 5.5 = halfway between 8 and 9.
+function chartPosition(lengthMm) {
+  const last = SIZE_CHART.length - 1;
+  if (lengthMm <= SIZE_CHART[0].mm) return 0;
+  if (lengthMm >= SIZE_CHART[last].mm) return last;
+  const i = SIZE_CHART.findIndex((row, idx) => lengthMm < SIZE_CHART[idx + 1].mm);
+  return i + (lengthMm - SIZE_CHART[i].mm) / (SIZE_CHART[i + 1].mm - SIZE_CHART[i].mm);
 }
 
-function formatNumericSize(inches) {
-  return (Math.round(inches * 2) / 2).toFixed(1).replace(/\.0$/, '');
+function formatLength(mm) {
+  return `${(mm / MM_PER_INCH).toFixed(2)} in · ${Math.round(mm)} mm`;
 }
 
 function showResult() {
@@ -371,39 +372,46 @@ function showResult() {
     return;
   }
   const mmPerPx = state.reference.mm / refPx;
+  const lengthMm = distance(state.points.length) * mmPerPx;
 
-  const widthMm = distance(state.points.width) * mmPerPx;
-  const circumferenceIn = (widthMm * CIRCUMFERENCE_PER_WIDTH) / MM_PER_INCH;
-  const lengthMm = state.points.length ? distance(state.points.length) * mmPerPx : null;
-  const lengthIn = lengthMm ? lengthMm / MM_PER_INCH : null;
-
-  // Gloves have to fit both around the hand and along it, so take the larger size.
-  const byCircumference = sizeIndexFor(circumferenceIn, 'maxCircumference');
-  const byLength = lengthIn ? sizeIndexFor(lengthIn, 'maxLength') : -1;
-  const sizeIndex = Math.max(byCircumference, byLength);
-  const size = SIZE_CHART[sizeIndex];
-
-  $('size-label').textContent = size.label;
-  drawGauge(sizeIndex, sizeIndex === byCircumference ? circumferenceIn : null);
-  $('size-number').textContent = `Numeric size ${formatNumericSize(circumferenceIn)}`;
-
-  const rows = [
-    ['Palm width', `${(widthMm / 10).toFixed(1)} cm · ${(widthMm / MM_PER_INCH).toFixed(2)} in`],
-    ['Est. hand circumference', `${(circumferenceIn * 2.54).toFixed(1)} cm · ${circumferenceIn.toFixed(2)} in`],
-  ];
-  if (lengthMm) {
-    rows.push(['Hand length', `${(lengthMm / 10).toFixed(1)} cm · ${lengthIn.toFixed(2)} in`]);
-  }
-  $('stats').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-
+  const position = chartPosition(lengthMm);
+  const lower = Math.floor(position);
+  const fraction = position - lower;
+  let label;
   let note = '';
-  if (widthMm < 55 || widthMm > 130) {
-    note = "That measurement looks unusual. Check that the markers are on the right spots and that the object you chose matches the one in the photo.";
-  } else if (byLength > byCircumference) {
-    note = 'Your fingers are long for your palm width, so we sized up to make sure the fingers fit.';
-  } else if (!lengthMm) {
-    note = 'Tip: adding your hand length makes the recommendation more accurate.';
+
+  let highlighted;
+
+  if (fraction <= SNAP_TO_SIZE) {
+    label = SIZE_CHART[lower].label;
+    highlighted = [lower];
+  } else if (fraction >= 1 - SNAP_TO_SIZE) {
+    label = SIZE_CHART[lower + 1].label;
+    highlighted = [lower + 1];
+  } else {
+    highlighted = [lower, lower + 1];
+    const small = SIZE_CHART[lower].label;
+    const big = SIZE_CHART[lower + 1].label;
+    label = `${small} / ${big}`;
+    note = `You're between sizes ${small} and ${big}. Choose ${small} for a tighter glove with better dexterity, or ${big} for a little more wiggle room and warmth.`;
   }
+
+  const first = SIZE_CHART[0];
+  const last = SIZE_CHART[SIZE_CHART.length - 1];
+  if (lengthMm < 90 || lengthMm > 250) {
+    note = "That measurement looks unusual. Check that the markers are on the right spots and that the object you chose matches the one in the photo.";
+  } else if (lengthMm < first.mm - 5) {
+    note = `Your hand is a little shorter than our smallest size (${first.label}), so that's the closest fit.`;
+  } else if (lengthMm > last.mm + 5) {
+    note = `Your hand is a little longer than our largest size (${last.label}), so that's the closest fit.`;
+  }
+
+  $('size-label').textContent = label;
+  $('size-number').textContent = 'TRUCK glove size';
+  drawGauge(position, highlighted);
+
+  const rows = [['Hand length', formatLength(lengthMm)]];
+  $('stats').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('result-note').textContent = note;
   $('result-note').classList.toggle('hidden', !note);
 
@@ -422,8 +430,8 @@ $('restart-btn').addEventListener('click', () => {
   showScreen('start');
 });
 
-// Truck-dash style gauge: one segment per size, needle on the recommended size.
-function drawGauge(sizeIndex, circumferenceIn) {
+// Dashboard-style gauge: one segment per size, needle at the measured length.
+function drawGauge(position, highlighted) {
   const svg = $('gauge');
   const cx = 150;
   const cy = 165;
@@ -443,16 +451,8 @@ function drawGauge(sizeIndex, circumferenceIn) {
     return `M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}`;
   };
 
-  // Where inside the segment the needle sits: proportional to circumference
-  // when that decided the size, otherwise the middle of the segment.
-  let within = 0.5;
-  if (circumferenceIn !== null) {
-    const upper = SIZE_CHART[sizeIndex].maxCircumference;
-    const lower = sizeIndex > 0 ? SIZE_CHART[sizeIndex - 1].maxCircumference : upper - 1;
-    const top = Number.isFinite(upper) ? upper : lower + 1;
-    within = clamp((circumferenceIn - lower) / (top - lower), 0.08, 0.92);
-  }
-  const needleDeg = startDeg - ((sizeIndex + within) / n) * sweep;
+  // Each size sits in the middle of its segment.
+  const needleDeg = startDeg - ((position + 0.5) / n) * sweep;
 
   let parts = '';
   // Bezel
@@ -460,10 +460,10 @@ function drawGauge(sizeIndex, circumferenceIn) {
   for (let i = 0; i < n; i++) {
     const from = startDeg - (i / n) * sweep - (i === 0 ? 0 : gap / 2);
     const to = startDeg - ((i + 1) / n) * sweep + (i === n - 1 ? 0 : gap / 2);
-    const active = i === sizeIndex;
+    const active = highlighted.includes(i);
     parts += `<path d="${arc(from, to, r)}" fill="none" stroke="${active ? '#ffc20e' : '#3a3e45'}" stroke-width="26" />`;
     const mid = polar((from + to) / 2, r + 0.5);
-    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue, Impact, sans-serif" font-size="17" fill="${active ? '#111214' : '#a7a9ad'}">${SIZE_CHART[i].label}</text>`;
+    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue, Impact, sans-serif" font-size="16" fill="${active ? '#111214' : '#a7a9ad'}">${SIZE_CHART[i].label}</text>`;
   }
   // Minor ticks
   for (let t = 0; t <= n * 4; t++) {

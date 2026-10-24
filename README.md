@@ -1,6 +1,6 @@
 # Glove Size Finder
 
-A mobile web page that recommends a glove size from one photo. The user lays their hand flat next to a credit card, ID card or coin, takes a photo from above, and drags markers onto the object and across their knuckles. The known size of the object sets the scale, so the page can measure the hand.
+A mobile web page that recommends a TRUCK glove size from one photo. The user lays their hand flat next to a credit card, ID card or coin, takes a photo from above, and drags markers onto the object and from their wrist crease to the tip of their longest finger. The known size of the object sets the scale, so the page can measure hand length and match it to the TRUCK sizing chart (sizes 3–11).
 
 Everything runs in the browser. Photos are never uploaded anywhere.
 
@@ -14,9 +14,9 @@ Everything runs in the browser. Photos are never uploaded anywhere.
 
 In `app.js`:
 
-- `SIZE_CHART` – the size boundaries. Replace these with your own brand's chart.
+- `SIZE_CHART` – hand length in mm for each glove size, from the TRUCK sizing chart.
+- `SNAP_TO_SIZE` – how close a hand must be to a size to get that size instead of "between sizes".
 - `REFERENCES` – the objects users can pick for scale.
-- `CIRCUMFERENCE_PER_WIDTH` – how hand circumference is estimated from palm width (2.5 by default).
 
 ## Trying it
 
