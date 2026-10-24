@@ -58,21 +58,21 @@ const STEPS = [
     id: 'reference',
     title: () => `Mark the ${state.reference.id === 'card' ? 'card' : 'coin'}`,
     help: () => state.reference.markHelp,
-    color: '#2563eb',
+    color: '#38bdf8',
     start: [[0.35, 0.8], [0.65, 0.8]],
   },
   {
     id: 'width',
     title: () => 'Mark your palm width',
     help: () => 'Drag the markers to the outer edges of your hand, across the knuckles (not including your thumb).',
-    color: '#dc2626',
+    color: '#ffc20e',
     start: [[0.3, 0.45], [0.7, 0.45]],
   },
   {
     id: 'length',
     title: () => 'Mark your hand length (optional)',
     help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your middle finger.',
-    color: '#16a34a',
+    color: '#ff6a13',
     start: [[0.5, 0.75], [0.5, 0.2]],
     optional: true,
   },
@@ -384,6 +384,7 @@ function showResult() {
   const size = SIZE_CHART[sizeIndex];
 
   $('size-label').textContent = size.label;
+  drawGauge(sizeIndex, sizeIndex === byCircumference ? circumferenceIn : null);
   $('size-number').textContent = `Numeric size ${formatNumericSize(circumferenceIn)}`;
 
   const rows = [
@@ -420,6 +421,66 @@ $('restart-btn').addEventListener('click', () => {
   state.points = {};
   showScreen('start');
 });
+
+// Truck-dash style gauge: one segment per size, needle on the recommended size.
+function drawGauge(sizeIndex, circumferenceIn) {
+  const svg = $('gauge');
+  const cx = 150;
+  const cy = 165;
+  const r = 118;
+  const n = SIZE_CHART.length;
+  const startDeg = 180;
+  const sweep = 180;
+  const gap = 2; // degrees between segments
+
+  const polar = (deg, radius) => {
+    const rad = (deg * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
+  };
+  const arc = (fromDeg, toDeg, radius) => {
+    const a = polar(fromDeg, radius);
+    const b = polar(toDeg, radius);
+    return `M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}`;
+  };
+
+  // Where inside the segment the needle sits: proportional to circumference
+  // when that decided the size, otherwise the middle of the segment.
+  let within = 0.5;
+  if (circumferenceIn !== null) {
+    const upper = SIZE_CHART[sizeIndex].maxCircumference;
+    const lower = sizeIndex > 0 ? SIZE_CHART[sizeIndex - 1].maxCircumference : upper - 1;
+    const top = Number.isFinite(upper) ? upper : lower + 1;
+    within = clamp((circumferenceIn - lower) / (top - lower), 0.08, 0.92);
+  }
+  const needleDeg = startDeg - ((sizeIndex + within) / n) * sweep;
+
+  let parts = '';
+  // Bezel
+  parts += `<path d="${arc(180, 0, r + 22)}" fill="none" stroke="#111214" stroke-width="8" />`;
+  for (let i = 0; i < n; i++) {
+    const from = startDeg - (i / n) * sweep - (i === 0 ? 0 : gap / 2);
+    const to = startDeg - ((i + 1) / n) * sweep + (i === n - 1 ? 0 : gap / 2);
+    const active = i === sizeIndex;
+    parts += `<path d="${arc(from, to, r)}" fill="none" stroke="${active ? '#ffc20e' : '#3a3e45'}" stroke-width="26" />`;
+    const mid = polar((from + to) / 2, r + 0.5);
+    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue, Impact, sans-serif" font-size="17" fill="${active ? '#111214' : '#a7a9ad'}">${SIZE_CHART[i].label}</text>`;
+  }
+  // Minor ticks
+  for (let t = 0; t <= n * 4; t++) {
+    const deg = startDeg - (t / (n * 4)) * sweep;
+    const a = polar(deg, r - 22);
+    const b = polar(deg, r - (t % 4 === 0 ? 34 : 28));
+    parts += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#6b7078" stroke-width="${t % 4 === 0 ? 2 : 1}" />`;
+  }
+  // Needle and hub
+  const tip = polar(needleDeg, r - 6);
+  const tail = polar(needleDeg + 180, 14);
+  parts += `<line x1="${tail.x}" y1="${tail.y}" x2="${tip.x}" y2="${tip.y}" stroke="#ff6a13" stroke-width="5" stroke-linecap="round" />`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="12" fill="#111214" stroke="#6b7078" stroke-width="2" />`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#ff6a13" />`;
+
+  svg.innerHTML = parts;
+}
 
 // ---------- Helpers ----------
 
