@@ -70,6 +70,9 @@ const STEPS = [
     help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your longest finger.',
     color: '#b4cc24',
     start: [[0.5, 0.75], [0.5, 0.2]],
+    // Hand length is measured straight along the hand, which points up the
+    // photo, so stop the line from drifting sideways while zoomed in.
+    maxTiltDeg: 15,
   },
 ];
 
@@ -174,10 +177,13 @@ function draw() {
   ctx.clearRect(0, 0, view.cssWidth, view.cssHeight);
   ctx.drawImage(state.image, 0, 0, view.cssWidth, view.cssHeight);
 
-  STEPS.forEach((step, i) => {
-    const pts = state.points[step.id];
+  const step = currentStep();
+  if (drag && step.maxTiltDeg) drawGuide(state.points[step.id]);
+
+  STEPS.forEach((s, i) => {
+    const pts = state.points[s.id];
     if (!pts || i > state.stepIndex) return;
-    drawMeasurement(pts, step.color, i === state.stepIndex);
+    drawMeasurement(pts, s.color, i === state.stepIndex);
   });
 }
 
@@ -216,6 +222,25 @@ function drawMeasurement(pts, color, active) {
       ctx.stroke();
     }
   }
+  ctx.restore();
+}
+
+// Faint line running the full height of the photo through both markers, so
+// the direction stays visible while the finger covers part of the line.
+function drawGuide(pts) {
+  const [a, b] = pts.map(toCss);
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  if (dy === 0) return;
+  const xAt = (y) => a.x + (dx * (y - a.y)) / dy;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 5]);
+  ctx.beginPath();
+  ctx.moveTo(xAt(0), 0);
+  ctx.lineTo(xAt(view.cssHeight), view.cssHeight);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -262,6 +287,7 @@ const endDrag = (event) => {
   if (!drag || event.pointerId !== drag.pointerId) return;
   drag = null;
   loupe.classList.add('hidden');
+  draw();
 };
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
@@ -272,13 +298,28 @@ function eventPos(event) {
 }
 
 function moveDrag(pos) {
-  const x = clamp(pos.x + drag.offset.x, 0, view.cssWidth);
-  const y = clamp(pos.y + drag.offset.y, 0, view.cssHeight);
-  const p = state.points[currentStep().id][drag.index];
-  p.x = x / view.scale;
-  p.y = y / view.scale;
+  const step = currentStep();
+  const pts = state.points[step.id];
+  const p = pts[drag.index];
+  p.x = clamp(pos.x + drag.offset.x, 0, view.cssWidth) / view.scale;
+  p.y = clamp(pos.y + drag.offset.y, 0, view.cssHeight) / view.scale;
+  if (step.maxTiltDeg) limitTilt(p, pts[1 - drag.index], step.maxTiltDeg);
   draw();
-  drawLoupe({ x, y });
+  drawLoupe(toCss(p));
+}
+
+// Keep the line from `anchor` to `p` within `maxDeg` of vertical, keeping its
+// length, by rotating `p` around `anchor`.
+function limitTilt(p, anchor, maxDeg) {
+  const dx = p.x - anchor.x;
+  const dy = p.y - anchor.y;
+  const len = Math.hypot(dx, dy);
+  const max = (maxDeg * Math.PI) / 180;
+  if (len === 0 || Math.atan2(Math.abs(dx), Math.abs(dy)) <= max) return;
+  p.x = anchor.x + Math.sign(dx) * len * Math.sin(max);
+  p.y = anchor.y + (dy < 0 ? -1 : 1) * len * Math.cos(max);
+  p.x = clamp(p.x, 0, state.image.width);
+  p.y = clamp(p.y, 0, state.image.height);
 }
 
 // Magnified view above the finger, for precise placement on small screens.
@@ -295,6 +336,24 @@ function drawLoupe(cssPoint) {
     p.x - srcSize / 2, p.y - srcSize / 2, srcSize, srcSize,
     0, 0, size, size,
   );
+  // The measurement line, so its direction is visible while zoomed in
+  const pts = state.points[currentStep().id];
+  const toLoupe = (q) => ({
+    x: ((q.x - p.x) / srcSize) * size + size / 2,
+    y: ((q.y - p.y) / srcSize) * size + size / 2,
+  });
+  const a = toLoupe(pts[0]);
+  const b = toLoupe(pts[1]);
+  loupeCtx.save();
+  loupeCtx.setLineDash([6, 4]);
+  loupeCtx.lineWidth = 2;
+  loupeCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+  loupeCtx.beginPath();
+  loupeCtx.moveTo(a.x, a.y);
+  loupeCtx.lineTo(b.x, b.y);
+  loupeCtx.stroke();
+  loupeCtx.restore();
+
   loupeCtx.strokeStyle = currentStep().color;
   loupeCtx.lineWidth = 2;
   loupeCtx.beginPath();
