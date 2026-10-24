@@ -32,6 +32,12 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 .brand img { display: block; height: 30px; width: auto; }
+/* More room for the photo while taking and marking it */
+body[data-screen="camera"] .announce,
+body[data-screen="measure"] .announce { display: none; }
+body[data-screen="camera"] #app,
+body[data-screen="measure"] #app { padding-top: 16px; }
+
 .announce {
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
@@ -169,6 +175,106 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   pointer-events: none;
 }
 
+/* ---------- Camera ---------- */
+
+.camera-wrap {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #111;
+  border-radius: 3px;
+  aspect-ratio: 3 / 4;
+}
+#camera-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.camera-frame {
+  position: absolute;
+  inset: 7% 14%;
+  border: 2px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+.camera-frame span {
+  margin-top: -1px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.75rem;
+  border-radius: 0 0 6px 6px;
+}
+.level {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  border: 3px solid var(--rust);
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+.level::before {
+  /* target circle the bubble should sit in */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.level-bubble {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.08s linear;
+}
+.level.is-level { border-color: var(--lime); }
+.level.is-level .level-bubble { background: var(--lime); }
+.camera-status { margin: 12px 0 0; text-align: center; color: var(--head); font-weight: 500; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.text-link {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  color: var(--head);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.text-link input { display: none; }
+.privacy { margin: 10px 0 0; text-align: center; font-size: 0.85rem; }
+
+/* ---------- Zoom ---------- */
+
+.zoom-reset {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font: 500 0.75rem/1 "Poppins", sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.zoom-hint { margin: 8px 0 0; text-align: center; font-size: 0.8rem; }
+
 /* ---------- Result ---------- */
 
 .result-head { text-align: center; }
@@ -203,8 +309,7 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   top: 26px;
   height: 10px;
   border-radius: 5px;
-  /* Lime fade from the official TRUCK chart */
-  background: linear-gradient(90deg, #f4f8d6, var(--lime));
+  background: var(--lime);
 }
 .tick {
   position: absolute;

@@ -22,7 +22,8 @@
     <!-- Step 1: pick a reference object -->
     <section class="screen" id="screen-start">
       <h1>Find your glove size</h1>
-      <p class="lead">One photo of your hand next to a card or coin. We'll do the measuring.</p>
+      <p class="lead">One photo of your hand with a card or coin on your palm. We'll do the measuring.</p>
+      <p class="privacy">Your photo stays on your phone. It's never uploaded or saved.</p>
 
       <h2>Pick your reference</h2>
       <div class="choices" id="reference-choices"></div>
@@ -30,14 +31,29 @@
       <h2>Photo checklist</h2>
       <ol class="tips">
         <li>Lay your <strong>dominant hand palm up</strong> on a table, fingers together and pointing to the top of the photo, so your wrist crease shows.</li>
-        <li><strong>Rest the card or coin on your palm</strong>, flat, so it's at the same height as your hand.</li>
-        <li>Hold the phone <strong>straight above</strong> at about arm's length (at least 40 cm / 16 in). Zoom in a little if you need to.</li>
+        <li><strong>Rest the card or coin on your palm</strong>, flat, so it's at the same height as your hand. Point the card's long edge toward your fingers.</li>
+        <li>Hold the phone <strong>flat, straight above</strong> your hand at about arm's length (at least 40 cm / 16 in). The camera's level will tell you when it's flat.</li>
       </ol>
 
-      <label class="btn primary file-btn">
-        Take or choose photo
-        <input type="file" id="photo-input" accept="image/*" capture="environment">
+      <button class="btn primary file-btn" id="camera-btn" type="button">Open camera</button>
+      <label class="text-link">
+        Choose a photo instead
+        <input type="file" id="photo-input" accept="image/*">
       </label>
+    </section>
+
+    <!-- In-app camera with framing guide and level -->
+    <section class="screen hidden" id="screen-camera">
+      <div class="camera-wrap" id="camera-wrap">
+        <video id="camera-video" playsinline muted autoplay></video>
+        <div class="camera-frame" aria-hidden="true"><span>Fit your hand and card inside the frame</span></div>
+        <div class="level hidden" id="level" aria-hidden="true"><span class="level-bubble" id="level-bubble"></span></div>
+      </div>
+      <p class="camera-status" id="camera-status">Starting camera…</p>
+      <div class="actions">
+        <button class="btn" id="camera-cancel" type="button">Cancel</button>
+        <button class="btn primary" id="shutter-btn" type="button" disabled>Take photo</button>
+      </div>
     </section>
 
     <!-- Step 2-4: place markers on the photo -->
@@ -50,7 +66,9 @@
       <div class="canvas-wrap" id="canvas-wrap">
         <canvas id="canvas"></canvas>
         <canvas id="loupe" class="hidden" width="140" height="140"></canvas>
+        <button class="zoom-reset hidden" id="zoom-reset" type="button">Reset zoom</button>
       </div>
+      <p class="zoom-hint">Pinch to zoom in. Drag with one finger to move around.</p>
       <div class="actions">
         <button class="btn" id="back-btn">Back</button>
         <button class="btn ghost hidden" id="skip-btn">Skip</button>
