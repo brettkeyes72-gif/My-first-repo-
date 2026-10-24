@@ -31,7 +31,7 @@ html, body {
   padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
   border-bottom: 1px solid var(--border);
 }
-.brand img { display: block; height: 40px; width: auto; }
+.brand img { display: block; height: 30px; width: auto; }
 .announce {
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
