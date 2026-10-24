@@ -69,15 +69,15 @@ const STEPS = [
     title: () => `Mark the ${state.reference.id === 'card' ? 'card' : 'coin'}`,
     help: () => state.reference.markHelp,
     color: '#c16452',
-    start: [[0.5, 0.62], [0.5, 0.42]],
+    start: [[0.5, 0.65], [0.5, 0.35]],
     vertical: true,
   },
   {
     id: 'length',
     title: () => 'Mark your hand length',
-    help: () => 'Drag one marker to the tip of your longest finger and the other to the wrist crease closest to your palm, where your palm ends. Most wrists have two or three creases; use the top one.',
+    help: () => 'Drag one marker to the tip of your longest finger and the other to the <strong>wrist crease closest to your palm</strong>. Most wrists have two or three creases: use the top one, right where your palm ends.',
     color: '#b4cc24',
-    start: [[0.5, 0.75], [0.5, 0.2]],
+    start: [[0.5, 0.82], [0.5, 0.18]],
     vertical: true,
   },
 ];
@@ -309,9 +309,11 @@ $('camera-cancel').addEventListener('click', () => {
 
 // ---------- Measuring screen ----------
 
-// scale: image px -> screen px with the whole photo fitted. zoom and pan
-// (tx, ty, in screen px) come from pinching.
-let view = { scale: 1, cssWidth: 0, cssHeight: 0, zoom: 1, tx: 0, ty: 0 };
+// The canvas fills the available box. scale: image px -> screen px with the
+// whole photo fitted inside it (zoom 1). fillZoom makes the photo fill the
+// box instead, which is where each step starts. zoom and pan (tx, ty, in
+// screen px) come from pinching.
+let view = { scale: 1, cssWidth: 0, cssHeight: 0, zoom: 1, fillZoom: 1, tx: 0, ty: 0 };
 const MAX_ZOOM = 6;
 
 function layoutCanvas() {
@@ -320,16 +322,31 @@ function layoutCanvas() {
   // Fit the photo and the buttons below it on screen without scrolling.
   const wrapTop = $('canvas-wrap').getBoundingClientRect().top + window.scrollY;
   const maxHeight = Math.max(260, window.innerHeight - wrapTop - 130);
-  const scale = Math.min(wrapWidth / img.width, maxHeight / img.height);
+  const cssWidth = wrapWidth;
+  const cssHeight = Math.min(maxHeight, img.height * (wrapWidth / img.width));
+  const scale = Math.min(cssWidth / img.width, cssHeight / img.height);
+  const fillZoom = Math.max(cssWidth / img.width, cssHeight / img.height) / scale;
   const dpr = window.devicePixelRatio || 1;
 
-  view = { scale, cssWidth: img.width * scale, cssHeight: img.height * scale, zoom: 1, tx: 0, ty: 0 };
+  view = { scale, cssWidth, cssHeight, zoom: 1, fillZoom, tx: 0, ty: 0 };
   canvas.style.width = `${view.cssWidth}px`;
   canvas.style.height = `${view.cssHeight}px`;
   canvas.style.margin = '0 auto';
   canvas.width = Math.round(view.cssWidth * dpr);
   canvas.height = Math.round(view.cssHeight * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fillView();
+}
+
+// Fill the box with the photo, centered on the current step's markers.
+function fillView() {
+  const pts = state.points[currentStep().id];
+  const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+  view.zoom = view.fillZoom;
+  const k = view.scale * view.zoom;
+  view.tx = view.cssWidth / 2 - mid.x * k;
+  view.ty = view.cssHeight / 2 - mid.y * k;
+  clampPan();
   draw();
 }
 
@@ -341,18 +358,22 @@ function enterStep() {
   const step = currentStep();
   // The card is only sharp while it's being marked.
   if (step.id === 'reference') state.image = state.original;
-  if (!state.points[step.id]) {
-    state.points[step.id] = step.start.map(([fx, fy]) => ({
-      x: fx * state.image.width,
-      y: fy * state.image.height,
-    }));
+  const isNew = !state.points[step.id];
+  if (isNew) {
+    // Center the view on the photo, then put the markers inside what's shown.
+    const center = { x: state.image.width / 2, y: state.image.height / 2 };
+    state.points[step.id] = [{ ...center }, { ...center }];
   }
   $('step-count').textContent = `Step ${state.stepIndex + 1} of ${STEPS.length}`;
   $('step-title').textContent = step.title();
-  $('step-help').textContent = step.help();
+  $('step-help').innerHTML = step.help();
   $('skip-btn').classList.toggle('hidden', !step.optional);
   $('next-btn').textContent = state.stepIndex === STEPS.length - 1 ? 'See my size' : 'Next';
   layoutCanvas();
+  if (isNew) {
+    state.points[step.id] = step.start.map(([fx, fy]) => toImage({ x: fx * view.cssWidth, y: fy * view.cssHeight }));
+    draw();
+  }
 }
 
 function draw() {
@@ -368,7 +389,7 @@ function draw() {
     if (!pts || i > state.stepIndex) return;
     drawMeasurement(pts, s.color, i === state.stepIndex);
   });
-  $('zoom-reset').classList.toggle('hidden', view.zoom <= 1.01);
+  $('zoom-reset').classList.toggle('hidden', Math.abs(view.zoom - view.fillZoom) < 0.01);
 }
 
 function drawMeasurement(pts, color, active) {
@@ -445,19 +466,17 @@ function hexToRgba(hex, alpha) {
 }
 
 // Keep the zoomed photo covering the canvas.
+// Keep the photo covering the box; when it's smaller than the box in a
+// direction, center it that way.
 function clampPan() {
-  const w = view.cssWidth * view.zoom;
-  const h = view.cssHeight * view.zoom;
-  view.tx = clamp(view.tx, view.cssWidth - w, 0);
-  view.ty = clamp(view.ty, view.cssHeight - h, 0);
+  const k = view.scale * view.zoom;
+  const w = state.image.width * k;
+  const h = state.image.height * k;
+  view.tx = w <= view.cssWidth ? (view.cssWidth - w) / 2 : clamp(view.tx, view.cssWidth - w, 0);
+  view.ty = h <= view.cssHeight ? (view.cssHeight - h) / 2 : clamp(view.ty, view.cssHeight - h, 0);
 }
 
-$('zoom-reset').addEventListener('click', () => {
-  view.zoom = 1;
-  view.tx = 0;
-  view.ty = 0;
-  draw();
-});
+$('zoom-reset').addEventListener('click', fillView);
 
 // ---------- Touch gestures ----------
 //
@@ -526,7 +545,7 @@ canvas.addEventListener('pointermove', (event) => {
     const dx = pos.x - gesture.start.x;
     const dy = pos.y - gesture.start.y;
     if (gesture.mode === 'pending' && Math.hypot(dx, dy) > TAP_SLOP) gesture.mode = 'pan';
-    if (gesture.mode === 'pan' && view.zoom > 1) {
+    if (gesture.mode === 'pan') {
       view.tx = gesture.panStart.tx + dx;
       view.ty = gesture.panStart.ty + dy;
       clampPan();
@@ -790,6 +809,7 @@ function showResult() {
     note = `Your hand is a little longer than our largest size (${sizeName(last)}), so that's the closest fit.`;
   }
 
+  state.result = { rows, lengthMm };
   $('size-label').textContent = rows.map((r) => r.label).join(' / ');
   const letters = rows.filter((r) => r.letter).map((r) => r.letter).join(' / ');
   $('size-letter').textContent = letters;
@@ -843,6 +863,52 @@ function renderChart(lengthMm, highlighted) {
       <td>${row.in} in <span class="mm">/ ${row.mm} mm</span></td>
     </tr>`;
   }).join('');
+}
+
+// ---------- Sharing ----------
+
+// The finder's own address, without anything after it.
+const FINDER_URL = location.origin + location.pathname;
+
+function shareMessage(kind) {
+  if (kind === 'result' && state.result) {
+    const sizes = state.result.rows.map(sizeName).join(' or ');
+    const mm = state.result.lengthMm;
+    return `My TRUCK glove size is ${sizes}. Hand length ${(mm / MM_PER_INCH).toFixed(2)} in (${Math.round(mm)} mm). Measured with the TRUCK Glove Size Finder:`;
+  }
+  return 'Hey, can you check your TRUCK glove size with this? It takes a minute, then send me your size:';
+}
+
+async function share(kind) {
+  const text = shareMessage(kind);
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'TRUCK Glove Size Finder', text, url: FINDER_URL });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // closed the share sheet
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(`${text} ${FINDER_URL}`);
+    showToast('Copied. Paste it into a message.');
+  } catch (e) {
+    showToast(FINDER_URL);
+  }
+}
+
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-share]');
+  if (button) share(button.dataset.share);
+});
+
+let toastTimer;
+function showToast(text) {
+  const toast = $('toast');
+  toast.textContent = text;
+  toast.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
 }
 
 // ---------- Helpers ----------

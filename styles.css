@@ -148,7 +148,7 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   /* angled corner, like the cut on the TRUCK "A" */
   clip-path: polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%);
 }
-.step-icon svg, .choice .icon svg {
+.step-icon svg, .choice .icon svg, .share-btn svg {
   width: 30px;
   height: 30px;
   fill: none;
@@ -198,6 +198,7 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
 }
 .step-header h2 { margin: 6px 0 6px; }
 .step-header p { margin: 0 0 16px; }
+.step-header strong { color: var(--head); font-weight: 600; }
 
 .canvas-wrap {
   position: relative;
@@ -512,3 +513,50 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   color: var(--head);
 }
 .disclaimer { font-size: 0.85rem; }
+
+/* ---------- Sharing ---------- */
+
+.gift {
+  display: flex;
+  gap: 14px;
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--lime);
+  border-radius: 3px;
+}
+.gift p { margin: 0 0 12px; font-size: 0.9rem; }
+.gift .gift-title {
+  margin: 0 0 2px;
+  font: 700 1.15rem/1.2 "Oswald", sans-serif;
+  text-transform: uppercase;
+  color: var(--head);
+}
+.share-btn { gap: 10px; }
+.share-btn svg { width: 20px; height: 20px; }
+.gift .share-btn { width: auto; min-height: 44px; padding: 10px 16px; font-size: 0.8rem; }
+
+.share-result { margin-top: 24px; text-align: center; }
+.share-result .share-btn { width: 100%; }
+button.text-link {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 12px 18px;
+  background: var(--head);
+  color: #fff;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}

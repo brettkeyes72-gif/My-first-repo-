@@ -25,6 +25,15 @@
       <p class="lead">One photo of your hand with a card or coin on your palm. We'll do the measuring.</p>
       <p class="privacy">Your photo stays on your phone. It's never uploaded or saved.</p>
 
+      <div class="gift">
+        <span class="step-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12"/><path d="M12 8v12.5"/><path d="M12 8C10.5 4.5 6.5 4 6.5 6.3 6.5 8 12 8 12 8zM12 8c1.5-3.5 5.5-4 5.5-1.7C17.5 8 12 8 12 8z"/></svg></span>
+        <div>
+          <p class="gift-title">Buying gloves for someone?</p>
+          <p>Send them this finder. They measure their hand and send you their size.</p>
+          <button class="btn share-btn" type="button" data-share="invite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg> Send to a friend</button>
+        </div>
+      </div>
+
       <h2>Pick your reference</h2>
       <div class="choices" id="reference-choices"></div>
 
@@ -93,9 +102,9 @@
       <div class="canvas-wrap" id="canvas-wrap">
         <canvas id="canvas"></canvas>
         <canvas id="loupe" class="hidden" width="140" height="140"></canvas>
-        <button class="zoom-reset hidden" id="zoom-reset" type="button">Reset zoom</button>
+        <button class="zoom-reset hidden" id="zoom-reset" type="button">Reset view</button>
       </div>
-      <p class="zoom-hint">Pinch to zoom in. Drag with one finger to move around.</p>
+      <p class="zoom-hint">Pinch to zoom. Drag to move around.</p>
       <div class="actions">
         <button class="btn" id="back-btn">Back</button>
         <button class="btn ghost hidden" id="skip-btn">Skip</button>
@@ -113,6 +122,11 @@
       </div>
 
       <p class="note" id="result-note"></p>
+
+      <div class="share-result">
+        <button class="btn primary share-btn" type="button" data-share="result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg> Send my size</button>
+        <button class="text-link" type="button" data-share="invite">Send this finder to someone else</button>
+      </div>
 
       <div class="chart">
         <h2 class="chart-title">Glove sizing chart</h2>
@@ -133,6 +147,7 @@
       </div>
     </section>
   </main>
+  <div class="toast hidden" id="toast" role="status"></div>
   <script src="app.js"></script>
 </body>
 </html>
