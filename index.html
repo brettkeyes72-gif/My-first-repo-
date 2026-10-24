@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Glove Size Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+    <!-- Step 1: pick a reference object -->
+    <section class="screen" id="screen-start">
+      <h1>Find your glove size</h1>
+      <p class="lead">Take one photo of your hand next to a common object and we'll measure it for you.</p>
+
+      <h2>What will you use for scale?</h2>
+      <div class="choices" id="reference-choices"></div>
+
+      <h2>How to take the photo</h2>
+      <ol class="tips">
+        <li>Lay your <strong>dominant hand</strong> flat on a plain table, fingers together.</li>
+        <li>Put the object right next to your hand, flat on the same table.</li>
+        <li>Hold the phone <strong>straight above</strong> your hand, not at an angle.</li>
+      </ol>
+
+      <label class="btn primary file-btn">
+        Take or choose photo
+        <input type="file" id="photo-input" accept="image/*" capture="environment">
+      </label>
+    </section>
+
+    <!-- Step 2-4: place markers on the photo -->
+    <section class="screen hidden" id="screen-measure">
+      <div class="step-header">
+        <span class="step-count" id="step-count"></span>
+        <h2 id="step-title"></h2>
+        <p id="step-help"></p>
+      </div>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <canvas id="canvas"></canvas>
+        <canvas id="loupe" class="hidden" width="140" height="140"></canvas>
+      </div>
+      <div class="actions">
+        <button class="btn" id="back-btn">Back</button>
+        <button class="btn ghost hidden" id="skip-btn">Skip</button>
+        <button class="btn primary" id="next-btn">Next</button>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="screen hidden" id="screen-result">
+      <p class="eyebrow">Your recommended size</p>
+      <div class="size-badge" id="size-label"></div>
+      <p class="size-number" id="size-number"></p>
+      <dl class="stats" id="stats"></dl>
+      <p class="note" id="result-note"></p>
+      <p class="disclaimer">This is an estimate from a photo. If you're between sizes, size up for comfort or down for a snug grip.</p>
+      <div class="actions">
+        <button class="btn" id="redo-btn">Adjust markers</button>
+        <button class="btn primary" id="restart-btn">Start over</button>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
