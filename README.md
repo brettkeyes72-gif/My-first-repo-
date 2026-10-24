@@ -20,4 +20,4 @@ In `app.js`:
 
 ## Trying it
 
-Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → deploy from the `main` branch) to get a link you can open on your phone.
+Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → deploy from the `glove-size-finder` branch) to get a link you can open on your phone.

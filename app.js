@@ -61,14 +61,14 @@ const STEPS = [
     id: 'reference',
     title: () => `Mark the ${state.reference.id === 'card' ? 'card' : 'coin'}`,
     help: () => state.reference.markHelp,
-    color: '#38bdf8',
+    color: '#c16452',
     start: [[0.35, 0.8], [0.65, 0.8]],
   },
   {
     id: 'length',
     title: () => 'Mark your hand length',
     help: () => 'Drag one marker to the crease of your wrist and the other to the tip of your longest finger.',
-    color: '#ffc20e',
+    color: '#b4cc24',
     start: [[0.5, 0.75], [0.5, 0.2]],
   },
 ];
@@ -134,7 +134,9 @@ let view = { scale: 1, cssWidth: 0, cssHeight: 0 };
 function layoutCanvas() {
   const img = state.image;
   const wrapWidth = $('canvas-wrap').clientWidth;
-  const maxHeight = window.innerHeight * 0.6;
+  // Fit the photo and the buttons below it on screen without scrolling.
+  const wrapTop = $('canvas-wrap').getBoundingClientRect().top + window.scrollY;
+  const maxHeight = Math.max(260, window.innerHeight - wrapTop - 100);
   const scale = Math.min(wrapWidth / img.width, maxHeight / img.height);
   const dpr = window.devicePixelRatio || 1;
 
@@ -456,28 +458,28 @@ function drawGauge(position, highlighted) {
 
   let parts = '';
   // Bezel
-  parts += `<path d="${arc(180, 0, r + 22)}" fill="none" stroke="#111214" stroke-width="8" />`;
+  parts += `<path d="${arc(180, 0, r + 22)}" fill="none" stroke="#e5e5e5" stroke-width="2" />`;
   for (let i = 0; i < n; i++) {
     const from = startDeg - (i / n) * sweep - (i === 0 ? 0 : gap / 2);
     const to = startDeg - ((i + 1) / n) * sweep + (i === n - 1 ? 0 : gap / 2);
     const active = highlighted.includes(i);
-    parts += `<path d="${arc(from, to, r)}" fill="none" stroke="${active ? '#ffc20e' : '#3a3e45'}" stroke-width="26" />`;
+    parts += `<path d="${arc(from, to, r)}" fill="none" stroke="${active ? '#171717' : '#efefed'}" stroke-width="26" />`;
     const mid = polar((from + to) / 2, r + 0.5);
-    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue, Impact, sans-serif" font-size="16" fill="${active ? '#111214' : '#a7a9ad'}">${SIZE_CHART[i].label}</text>`;
+    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Oswald, Impact, sans-serif" font-weight="500" font-size="15" fill="${active ? '#ffffff' : '#5c5c5c'}">${SIZE_CHART[i].label}</text>`;
   }
   // Minor ticks
   for (let t = 0; t <= n * 4; t++) {
     const deg = startDeg - (t / (n * 4)) * sweep;
     const a = polar(deg, r - 22);
     const b = polar(deg, r - (t % 4 === 0 ? 34 : 28));
-    parts += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#6b7078" stroke-width="${t % 4 === 0 ? 2 : 1}" />`;
+    parts += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#c4c4c4" stroke-width="${t % 4 === 0 ? 2 : 1}" />`;
   }
   // Needle and hub
   const tip = polar(needleDeg, r - 6);
   const tail = polar(needleDeg + 180, 14);
-  parts += `<line x1="${tail.x}" y1="${tail.y}" x2="${tip.x}" y2="${tip.y}" stroke="#ff6a13" stroke-width="5" stroke-linecap="round" />`;
-  parts += `<circle cx="${cx}" cy="${cy}" r="12" fill="#111214" stroke="#6b7078" stroke-width="2" />`;
-  parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#ff6a13" />`;
+  parts += `<line x1="${tail.x}" y1="${tail.y}" x2="${tip.x}" y2="${tip.y}" stroke="#c16452" stroke-width="4" stroke-linecap="round" />`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="11" fill="#ffffff" stroke="#171717" stroke-width="3" />`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#c16452" />`;
 
   svg.innerHTML = parts;
 }
