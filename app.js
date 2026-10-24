@@ -70,6 +70,8 @@ const STEPS = [
     help: () => state.reference.markHelp,
     color: '#c16452',
     start: [[0.5, 0.65], [0.5, 0.35]],
+    // The card is small: start zoomed in so it fills the box.
+    startView: 'fill',
     vertical: true,
   },
   {
@@ -78,6 +80,8 @@ const STEPS = [
     help: () => 'Drag one marker to the tip of your longest finger and the other to the <strong>wrist crease closest to your palm</strong>. Most wrists have two or three creases: use the top one, right where your palm ends.',
     color: '#b4cc24',
     start: [[0.5, 0.82], [0.5, 0.18]],
+    // The hand runs the length of the photo: start with all of it in view.
+    startView: 'fit',
     vertical: true,
   },
 ];
@@ -311,7 +315,7 @@ $('camera-cancel').addEventListener('click', () => {
 
 // The canvas fills the available box. scale: image px -> screen px with the
 // whole photo fitted inside it (zoom 1). fillZoom makes the photo fill the
-// box instead, which is where each step starts. zoom and pan (tx, ty, in
+// box instead. zoom and pan (tx, ty, in
 // screen px) come from pinching.
 let view = { scale: 1, cssWidth: 0, cssHeight: 0, zoom: 1, fillZoom: 1, tx: 0, ty: 0 };
 const MAX_ZOOM = 6;
@@ -338,11 +342,16 @@ function layoutCanvas() {
   fillView();
 }
 
-// Fill the box with the photo, centered on the current step's markers.
+// The step's starting view: the photo filling the box, centered on the
+// markers, or the whole photo.
+function startView() {
+  return currentStep().startView === 'fill' ? view.fillZoom : 1;
+}
+
 function fillView() {
   const pts = state.points[currentStep().id];
   const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
-  view.zoom = view.fillZoom;
+  view.zoom = startView();
   const k = view.scale * view.zoom;
   view.tx = view.cssWidth / 2 - mid.x * k;
   view.ty = view.cssHeight / 2 - mid.y * k;
@@ -389,7 +398,7 @@ function draw() {
     if (!pts || i > state.stepIndex) return;
     drawMeasurement(pts, s.color, i === state.stepIndex);
   });
-  $('zoom-reset').classList.toggle('hidden', Math.abs(view.zoom - view.fillZoom) < 0.01);
+  $('zoom-reset').classList.toggle('hidden', Math.abs(view.zoom - startView()) < 0.01);
 }
 
 function drawMeasurement(pts, color, active) {
