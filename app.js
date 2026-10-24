@@ -30,17 +30,19 @@ const REFERENCES = [
 ];
 
 // TRUCK glove sizing chart: hand length (tip of longest finger to crease of
-// wrist) for each glove size, from truckgloves.com.
+// wrist) for each glove size, from truckgloves.com, with the matching letter
+// size. Youth sizes for 3 and 4 follow common youth glove charts that size
+// by hand length (Youth S ~11 cm, Youth M ~14 cm).
 const SIZE_CHART = [
-  { label: '3', in: '4.75', mm: 120 },
-  { label: '4', in: '5.25', mm: 134 },
-  { label: '5', in: '5.75', mm: 146 },
-  { label: '6', in: '6.25', mm: 160 },
-  { label: '7', in: '6.75', mm: 171 },
-  { label: '8', in: '7.25', mm: 182 },
-  { label: '9', in: '7.5', mm: 192 },
-  { label: '10', in: '8.0', mm: 204 },
-  { label: '11', in: '8.5', mm: 215 },
+  { label: '3', letter: 'Youth S', short: 'YS', in: '4.75', mm: 120 },
+  { label: '4', letter: 'Youth M', short: 'YM', in: '5.25', mm: 134 },
+  { label: '5', letter: 'XXS', in: '5.75', mm: 146 },
+  { label: '6', letter: 'XS', in: '6.25', mm: 160 },
+  { label: '7', letter: 'S', in: '6.75', mm: 171 },
+  { label: '8', letter: 'M', in: '7.25', mm: 182 },
+  { label: '9', letter: 'L', in: '7.5', mm: 192 },
+  { label: '10', letter: 'XL', in: '8.0', mm: 204 },
+  { label: '11', letter: 'XXL', in: '8.5', mm: 215 },
 ];
 
 // How close (as a share of the gap to the next size) a hand has to be to a
@@ -720,6 +722,11 @@ function chartPosition(lengthMm) {
   return i + (lengthMm - SIZE_CHART[i].mm) / (SIZE_CHART[i + 1].mm - SIZE_CHART[i].mm);
 }
 
+// "9 (L)", or just "3" for sizes without a letter
+function sizeName(row) {
+  return row.letter ? `${row.label} (${row.letter})` : row.label;
+}
+
 function formatLength(mm) {
   return `${(mm / MM_PER_INCH).toFixed(2)} in · ${Math.round(mm)} mm`;
 }
@@ -738,36 +745,35 @@ function showResult() {
   const position = chartPosition(lengthMm);
   const lower = Math.floor(position);
   const fraction = position - lower;
-  let label;
   let note = '';
-
   let highlighted;
 
   if (fraction <= SNAP_TO_SIZE) {
-    label = SIZE_CHART[lower].label;
     highlighted = [lower];
   } else if (fraction >= 1 - SNAP_TO_SIZE) {
-    label = SIZE_CHART[lower + 1].label;
     highlighted = [lower + 1];
   } else {
     highlighted = [lower, lower + 1];
-    const small = SIZE_CHART[lower].label;
-    const big = SIZE_CHART[lower + 1].label;
-    label = `${small} / ${big}`;
+    const small = sizeName(SIZE_CHART[lower]);
+    const big = sizeName(SIZE_CHART[lower + 1]);
     note = `You're between sizes ${small} and ${big}. Choose ${small} for a tighter glove with better dexterity, or ${big} for a little more wiggle room and warmth.`;
   }
+  const rows = highlighted.map((i) => SIZE_CHART[i]);
 
   const first = SIZE_CHART[0];
   const last = SIZE_CHART[SIZE_CHART.length - 1];
   if (lengthMm < 90 || lengthMm > 250) {
     note = "That measurement looks unusual. Check that the markers are on the right spots and that the object you chose matches the one in the photo.";
   } else if (lengthMm < first.mm - 5) {
-    note = `Your hand is a little shorter than our smallest size (${first.label}), so that's the closest fit.`;
+    note = `Your hand is a little shorter than our smallest size (${sizeName(first)}), so that's the closest fit.`;
   } else if (lengthMm > last.mm + 5) {
-    note = `Your hand is a little longer than our largest size (${last.label}), so that's the closest fit.`;
+    note = `Your hand is a little longer than our largest size (${sizeName(last)}), so that's the closest fit.`;
   }
 
-  $('size-label').textContent = label;
+  $('size-label').textContent = rows.map((r) => r.label).join(' / ');
+  const letters = rows.filter((r) => r.letter).map((r) => r.letter).join(' / ');
+  $('size-letter').textContent = letters;
+  $('size-letter').classList.toggle('hidden', !letters);
   $('measured').textContent = `Your hand length: ${formatLength(lengthMm)}`;
   renderChart(lengthMm, highlighted);
   $('result-note').textContent = note;
@@ -801,7 +807,7 @@ function renderChart(lengthMm, highlighted) {
 
   const ticks = SIZE_CHART.map((row, i) => `
     <span class="tick${highlighted.includes(i) ? ' is-match' : ''}" style="left:${pct(row.mm)}">
-      <span class="tick-label">${row.label}</span>
+      <span class="tick-label">${row.label}${row.letter ? `<small>${row.short || row.letter}</small>` : ''}</span>
     </span>`).join('');
   $('ruler').innerHTML = `
     <div class="ruler-track"></div>
@@ -813,7 +819,7 @@ function renderChart(lengthMm, highlighted) {
     let tag = 'Your size';
     if (highlighted.length > 1) tag = i === highlighted[0] ? 'Snug fit' : 'Roomy fit';
     return `<tr${match ? ' class="is-match"' : ''}>
-      <td><span class="row-size">${row.label}</span>${match ? `<span class="your-size">${tag}</span>` : ''}</td>
+      <td><span class="row-size">${row.label}</span><span class="row-letter">${row.letter || ''}</span>${match ? `<span class="your-size">${tag}</span>` : ''}</td>
       <td>${row.in} in <span class="mm">/ ${row.mm} mm</span></td>
     </tr>`;
   }).join('');
