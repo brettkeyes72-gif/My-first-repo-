@@ -5,7 +5,7 @@
 const REFERENCES = [
   {
     id: 'card',
-    icon: '💳',
+    icon: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="1.8"/><path d="M5.5 9h3.5v2.5H5.5z"/><path d="M5.5 15h7"/></svg>',
     name: 'Any card the size of a credit card',
     detail: 'A gift card, hotel key, loyalty or library card works best. We blur the card as soon as you mark it.',
     mm: 85.6,
@@ -13,7 +13,7 @@ const REFERENCES = [
   },
   {
     id: 'quarter',
-    icon: '🪙',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6.5" stroke-dasharray="1.2 1.6"/></svg>',
     name: 'US quarter',
     detail: '25¢ coin',
     mm: 24.26,
@@ -21,7 +21,7 @@ const REFERENCES = [
   },
   {
     id: 'penny',
-    icon: '🪙',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="4.5"/></svg>',
     name: 'US penny',
     detail: '1¢ coin',
     mm: 19.05,

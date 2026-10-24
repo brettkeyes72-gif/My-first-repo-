@@ -88,33 +88,75 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   border-color: var(--head);
   box-shadow: inset 0 0 0 1px var(--head);
 }
-.choice .icon { font-size: 1.5rem; width: 2rem; text-align: center; }
+.choice .icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--surface);
+  color: var(--head);
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%);
+}
+.choice[aria-pressed="true"] .icon { background: var(--lime); }
 .choice small { display: block; font-weight: 400; font-size: 0.85rem; color: var(--text); }
 
 /* ---------- Photo tips ---------- */
 
-.tips { padding: 0; margin: 0; list-style: none; counter-reset: tip; }
-.tips li {
+/* Photo checklist: full-width black block with lime icon tiles */
+.checklist {
   position: relative;
-  padding-left: 40px;
-  margin-bottom: 14px;
-  counter-increment: tip;
+  overflow: hidden;
+  margin: 36px -16px 0;
+  padding: 30px 20px 10px;
+  background: var(--head);
+  color: #c9c9c9;
 }
-.tips li::before {
-  content: counter(tip);
+/* Large faint TRUCK "A" mark in the corner */
+.checklist::after {
+  content: "";
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 26px;
-  height: 26px;
+  right: -40px;
+  bottom: -30px;
+  width: 220px;
+  height: 220px;
+  background: url("assets/apple-touch-icon.png") center / contain no-repeat;
+  filter: invert(1);
+  opacity: 0.06;
+  pointer-events: none;
+}
+.checklist h2 { margin: 0 0 22px; color: #fff; }
+.steps { position: relative; z-index: 1; padding: 0; margin: 0; list-style: none; }
+.steps li { display: flex; gap: 16px; margin-bottom: 22px; }
+.steps p { margin: 0; }
+.steps strong { color: #fff; font-weight: 600; }
+.step-num {
+  display: block;
+  margin-bottom: 2px;
+  font: 700 0.95rem/1.2 "Oswald", sans-serif;
+  letter-spacing: 0.08em;
+  color: var(--lime);
+}
+.step-icon {
+  flex: none;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: var(--rust);
-  color: #fff;
-  font: 600 0.8rem/1 "Poppins", sans-serif;
+  width: 52px;
+  height: 52px;
+  background: var(--lime);
+  color: var(--head);
+  /* angled corner, like the cut on the TRUCK "A" */
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%);
 }
-.tips strong { color: var(--head); font-weight: 600; }
+.step-icon svg, .choice .icon svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* ---------- Buttons ---------- */
 
@@ -140,7 +182,7 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
 .btn.primary:active, .btn.primary:hover { background: var(--rust); border-color: var(--rust); }
 .btn:not(.primary):active { background: var(--surface); }
 .btn.ghost { border-color: var(--border); }
-.file-btn { width: 100%; margin-top: 32px; }
+.file-btn { width: 100%; margin-top: 28px; }
 .file-btn input { display: none; }
 
 .actions { display: flex; gap: 10px; margin-top: 18px; }
