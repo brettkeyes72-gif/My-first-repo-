@@ -58,17 +58,27 @@
 
     <!-- Result -->
     <section class="screen hidden" id="screen-result">
-      <p class="eyebrow">Your recommended size</p>
-      <div class="gauge-wrap">
-        <svg id="gauge" viewBox="0 0 300 190" role="img" aria-labelledby="size-label"></svg>
-        <div class="gauge-readout">
-          <div class="size-badge" id="size-label"></div>
-          <p class="size-number" id="size-number"></p>
-        </div>
+      <div class="result-head">
+        <p class="eyebrow">Your TRUCK glove size</p>
+        <div class="size-badge" id="size-label"></div>
+        <p class="measured" id="measured"></p>
       </div>
-      <dl class="stats" id="stats"></dl>
+
       <p class="note" id="result-note"></p>
-      <p class="disclaimer">This is an estimate from a photo. For the most accurate result, keep your hand flat and the phone straight above it.</p>
+
+      <div class="chart">
+        <h2 class="chart-title">Glove sizing chart</h2>
+        <div class="ruler" id="ruler" aria-hidden="true"></div>
+        <table class="size-table">
+          <thead>
+            <tr><th scope="col">Glove size</th><th scope="col">Hand length</th></tr>
+          </thead>
+          <tbody id="size-rows"></tbody>
+        </table>
+        <p class="chart-caption">Hand length is measured from the crease of your wrist to the tip of your longest finger.</p>
+      </div>
+
+      <p class="disclaimer">This is an estimate from a photo. If it doesn't look right, tap Adjust markers and check they sit exactly on the card's ends, your wrist crease and your fingertip.</p>
       <div class="actions">
         <button class="btn" id="redo-btn">Adjust markers</button>
         <button class="btn primary" id="restart-btn">Start over</button>

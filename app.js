@@ -32,15 +32,15 @@ const REFERENCES = [
 // TRUCK glove sizing chart: hand length (tip of longest finger to crease of
 // wrist) for each glove size, from truckgloves.com.
 const SIZE_CHART = [
-  { label: '3', mm: 120 },
-  { label: '4', mm: 134 },
-  { label: '5', mm: 146 },
-  { label: '6', mm: 160 },
-  { label: '7', mm: 171 },
-  { label: '8', mm: 182 },
-  { label: '9', mm: 192 },
-  { label: '10', mm: 204 },
-  { label: '11', mm: 215 },
+  { label: '3', in: '4.75', mm: 120 },
+  { label: '4', in: '5.25', mm: 134 },
+  { label: '5', in: '5.75', mm: 146 },
+  { label: '6', in: '6.25', mm: 160 },
+  { label: '7', in: '6.75', mm: 171 },
+  { label: '8', in: '7.25', mm: 182 },
+  { label: '9', in: '7.5', mm: 192 },
+  { label: '10', in: '8.0', mm: 204 },
+  { label: '11', in: '8.5', mm: 215 },
 ];
 
 // How close (as a share of the gap to the next size) a hand has to be to a
@@ -409,11 +409,8 @@ function showResult() {
   }
 
   $('size-label').textContent = label;
-  $('size-number').textContent = 'TRUCK glove size';
-  drawGauge(position, highlighted);
-
-  const rows = [['Hand length', formatLength(lengthMm)]];
-  $('stats').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  $('measured').textContent = `Your hand length: ${formatLength(lengthMm)}`;
+  renderChart(lengthMm, highlighted);
   $('result-note').textContent = note;
   $('result-note').classList.toggle('hidden', !note);
 
@@ -432,56 +429,34 @@ $('restart-btn').addEventListener('click', () => {
   showScreen('start');
 });
 
-// Dashboard-style gauge: one segment per size, needle at the measured length.
-function drawGauge(position, highlighted) {
-  const svg = $('gauge');
-  const cx = 150;
-  const cy = 165;
-  const r = 118;
-  const n = SIZE_CHART.length;
-  const startDeg = 180;
-  const sweep = 180;
-  const gap = 2; // degrees between segments
+// The official sizing chart, with the customer's size highlighted and a
+// marker on a ruler showing where their hand length falls.
+function renderChart(lengthMm, highlighted) {
+  const first = SIZE_CHART[0].mm;
+  const last = SIZE_CHART[SIZE_CHART.length - 1].mm;
+  const pad = (last - first) * 0.06;
+  const min = first - pad;
+  const max = last + pad;
+  const pct = (mm) => `${((clamp(mm, min, max) - min) / (max - min)) * 100}%`;
 
-  const polar = (deg, radius) => {
-    const rad = (deg * Math.PI) / 180;
-    return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
-  };
-  const arc = (fromDeg, toDeg, radius) => {
-    const a = polar(fromDeg, radius);
-    const b = polar(toDeg, radius);
-    return `M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}`;
-  };
+  const ticks = SIZE_CHART.map((row, i) => `
+    <span class="tick${highlighted.includes(i) ? ' is-match' : ''}" style="left:${pct(row.mm)}">
+      <span class="tick-label">${row.label}</span>
+    </span>`).join('');
+  $('ruler').innerHTML = `
+    <div class="ruler-track"></div>
+    ${ticks}
+    <span class="pin" style="left:${pct(lengthMm)}"><span class="pin-label">You</span></span>`;
 
-  // Each size sits in the middle of its segment.
-  const needleDeg = startDeg - ((position + 0.5) / n) * sweep;
-
-  let parts = '';
-  // Bezel
-  parts += `<path d="${arc(180, 0, r + 22)}" fill="none" stroke="#e5e5e5" stroke-width="2" />`;
-  for (let i = 0; i < n; i++) {
-    const from = startDeg - (i / n) * sweep - (i === 0 ? 0 : gap / 2);
-    const to = startDeg - ((i + 1) / n) * sweep + (i === n - 1 ? 0 : gap / 2);
-    const active = highlighted.includes(i);
-    parts += `<path d="${arc(from, to, r)}" fill="none" stroke="${active ? '#171717' : '#efefed'}" stroke-width="26" />`;
-    const mid = polar((from + to) / 2, r + 0.5);
-    parts += `<text x="${mid.x}" y="${mid.y}" text-anchor="middle" dominant-baseline="central" font-family="Oswald, Impact, sans-serif" font-weight="500" font-size="15" fill="${active ? '#ffffff' : '#5c5c5c'}">${SIZE_CHART[i].label}</text>`;
-  }
-  // Minor ticks
-  for (let t = 0; t <= n * 4; t++) {
-    const deg = startDeg - (t / (n * 4)) * sweep;
-    const a = polar(deg, r - 22);
-    const b = polar(deg, r - (t % 4 === 0 ? 34 : 28));
-    parts += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#c4c4c4" stroke-width="${t % 4 === 0 ? 2 : 1}" />`;
-  }
-  // Needle and hub
-  const tip = polar(needleDeg, r - 6);
-  const tail = polar(needleDeg + 180, 14);
-  parts += `<line x1="${tail.x}" y1="${tail.y}" x2="${tip.x}" y2="${tip.y}" stroke="#c16452" stroke-width="4" stroke-linecap="round" />`;
-  parts += `<circle cx="${cx}" cy="${cy}" r="11" fill="#ffffff" stroke="#171717" stroke-width="3" />`;
-  parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#c16452" />`;
-
-  svg.innerHTML = parts;
+  $('size-rows').innerHTML = SIZE_CHART.map((row, i) => {
+    const match = highlighted.includes(i);
+    let tag = 'Your size';
+    if (highlighted.length > 1) tag = i === highlighted[0] ? 'Snug fit' : 'Roomy fit';
+    return `<tr${match ? ' class="is-match"' : ''}>
+      <td><span class="row-size">${row.label}</span>${match ? `<span class="your-size">${tag}</span>` : ''}</td>
+      <td>${row.in} in <span class="mm">/ ${row.mm} mm</span></td>
+    </tr>`;
+  }).join('');
 }
 
 // ---------- Helpers ----------
