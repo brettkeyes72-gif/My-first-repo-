@@ -9,7 +9,7 @@ const REFERENCES = [
     name: 'Credit card or ID card',
     detail: "Any standard bank card, debit card or driver's license",
     mm: 85.6,
-    markHelp: 'Drag the two markers to the two ends of the card\'s long edge.',
+    markHelp: 'Drag the two markers to the very ends of the card\'s long edge, right on its outer edges. Use the zoom circle to line them up.',
   },
   {
     id: 'quarter',
@@ -17,7 +17,7 @@ const REFERENCES = [
     name: 'US quarter',
     detail: '25¢ coin',
     mm: 24.26,
-    markHelp: 'Drag the two markers to opposite edges of the coin, straight across the middle.',
+    markHelp: 'Drag the two markers to opposite outer edges of the coin, straight across the middle. Use the zoom circle to line them up.',
   },
   {
     id: 'penny',
@@ -25,7 +25,7 @@ const REFERENCES = [
     name: 'US penny',
     detail: '1¢ coin',
     mm: 19.05,
-    markHelp: 'Drag the two markers to opposite edges of the coin, straight across the middle.',
+    markHelp: 'Drag the two markers to opposite outer edges of the coin, straight across the middle. Use the zoom circle to line them up.',
   },
 ];
 
