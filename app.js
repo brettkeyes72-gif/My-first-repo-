@@ -159,10 +159,14 @@ const LEVEL_ENTER_DEG = 5;
 const LEVEL_EXIT_DEG = 6.5;
 // Smoothing for the motion sensor, so hand shake doesn't swing the bubble.
 const LEVEL_SMOOTHING = 0.15;
-// Take the photo automatically after the phone has been level this long.
-const AUTO_CAPTURE_MS = 1200;
+// Take the photo automatically after the phone has been level this long,
+// counting down 3-2-1 so people aren't caught mid-adjustment.
+const AUTO_CAPTURE_MS = 3000;
+// No auto-capture this soon after the camera opens, while people are still
+// getting their hand into position.
+const CAMERA_SETTLE_MS = 2000;
 
-const camera = { stream: null, levelSeen: false, isLevel: false, beta: 0, gamma: 0, levelSince: 0, timer: null };
+const camera = { stream: null, levelSeen: false, isLevel: false, beta: 0, gamma: 0, levelSince: 0, openedAt: 0, timer: null };
 const video = $('camera-video');
 
 $('camera-btn').addEventListener('click', async () => {
@@ -180,6 +184,7 @@ async function startCamera() {
   camera.levelSeen = false;
   camera.isLevel = false;
   camera.levelSince = 0;
+  camera.openedAt = performance.now();
   setCaptureProgress(0);
   $('level').classList.add('hidden');
   updateShutter();
@@ -262,13 +267,23 @@ function onOrientation(event) {
 // photo. Tilting away cancels it.
 function startAutoCapture() {
   camera.levelSince = performance.now();
-  setCameraStatus('Hold still…');
   const tick = () => {
     if (!camera.isLevel || !camera.stream) return;
-    const progress = (performance.now() - camera.levelSince) / AUTO_CAPTURE_MS;
-    setCaptureProgress(progress);
-    if (progress >= 1) takePhoto();
-    else camera.timer = requestAnimationFrame(tick);
+    const now = performance.now();
+    const start = Math.max(camera.levelSince, camera.openedAt + CAMERA_SETTLE_MS);
+    if (now < start) {
+      setCameraStatus('Line up your hand and card…');
+    } else {
+      const elapsed = now - start;
+      setCaptureProgress(elapsed / AUTO_CAPTURE_MS);
+      setCountdown(Math.ceil((AUTO_CAPTURE_MS - elapsed) / 1000));
+      setCameraStatus('Hold still. Taking the photo…');
+      if (elapsed >= AUTO_CAPTURE_MS) {
+        takePhoto();
+        return;
+      }
+    }
+    camera.timer = requestAnimationFrame(tick);
   };
   camera.timer = requestAnimationFrame(tick);
 }
@@ -276,6 +291,14 @@ function startAutoCapture() {
 function stopAutoCapture() {
   cancelAnimationFrame(camera.timer);
   setCaptureProgress(0);
+  setCountdown(0);
+}
+
+function setCountdown(n) {
+  const el = $('countdown');
+  if (el.textContent !== String(n || '')) el.textContent = n > 0 ? n : '';
+  el.classList.toggle('hidden', !(n > 0));
+  $('camera-wrap').classList.toggle('counting', n > 0);
 }
 
 function setCaptureProgress(fraction) {
@@ -293,8 +316,13 @@ function setCameraStatus(text) {
 
 $('shutter-btn').addEventListener('click', () => takePhoto());
 
+// Flash like a camera shutter so the switch to the next screen doesn't feel
+// sudden.
+const FLASH_MS = 350;
+
 function takePhoto() {
-  if (!video.videoWidth) return;
+  if (!video.videoWidth || camera.capturing) return;
+  camera.capturing = true;
   stopAutoCapture();
   const w = video.videoWidth;
   const h = video.videoHeight;
@@ -302,8 +330,14 @@ function takePhoto() {
   frame.width = w;
   frame.height = h;
   frame.getContext('2d').drawImage(video, 0, 0, w, h);
-  stopCamera();
-  useImage(frame, w, h);
+  setCameraStatus('Got it!');
+  $('camera-wrap').classList.add('flash');
+  setTimeout(() => {
+    $('camera-wrap').classList.remove('flash');
+    camera.capturing = false;
+    stopCamera();
+    useImage(frame, w, h);
+  }, FLASH_MS);
 }
 
 $('camera-cancel').addEventListener('click', () => {

@@ -323,6 +323,29 @@ h2 { font-size: 1.35rem; line-height: 1.2; margin: 32px 0 14px; }
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
+.countdown {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font: 700 6rem/1 "Oswald", sans-serif;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+.camera-wrap.counting .level { opacity: 0.25; }
+.camera-wrap.flash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: flash 0.35s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes flash {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
 .camera-wrap.is-level .level { border-color: var(--lime); }
 .camera-wrap.is-level .level-bubble { background: var(--lime); }
 .camera-status { margin: 12px 0 0; text-align: center; color: var(--head); font-weight: 500; }

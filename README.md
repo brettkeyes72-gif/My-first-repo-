@@ -6,7 +6,7 @@ Everything runs in the browser. Photos are never uploaded anywhere, and the card
 
 How it works:
 
-- **Camera:** the in-app camera shows a frame with a center line for the middle finger and card. The frame turns green when the phone is flat (within 5°, smoothed), and the photo takes itself after 1.2 seconds of holding level. People can also tap the shutter or pick an existing photo.
+- **Camera:** the in-app camera shows a frame with a center line for the middle finger and card. The frame turns green when the phone is flat (within 5°, smoothed), and after the phone has been level for 3 seconds (with a 3-2-1 countdown, and not in the first 2 seconds after opening) the photo takes itself. People can also tap the shutter or pick an existing photo.
 - **Marking:** pinch to zoom, drag with one finger to pan, and a zoom circle while dragging. Both measurement lines are locked vertical, so the card and hand should be lined up with the photo's center line.
 - **Sharing:** "Send to a friend" on the start screen and "Send my size" on the result open the phone's share sheet (or copy to the clipboard), so someone buying gloves as a gift can send the finder and get the size back.
 - **Hand length** runs from the tip of the longest finger to the wrist crease closest to the palm (the distal wrist crease).
