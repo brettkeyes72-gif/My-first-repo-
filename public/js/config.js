@@ -1,6 +1,6 @@
 // Site settings. Edit this file to switch the site from demo mode to live mode.
 //
-// DEMO MODE (firebase: null)
+// DEMO MODE (set firebase: null)
 //   The board comes from data/board.json if it exists, otherwise data/demo-board.json.
 //   Messages and video notes are saved on this device only.
 //
@@ -8,15 +8,17 @@
 //   Everyone signs in. The board, messages, video notes and files are shared live
 //   between TRUCK and SSC. See README.md, "Going live".
 export const CONFIG = {
-  firebase: null,
-  // firebase: {
-  //   apiKey: "…",
-  //   authDomain: "truck-ssc.firebaseapp.com",
-  //   projectId: "truck-ssc",
-  //   storageBucket: "truck-ssc.appspot.com",
-  //   messagingSenderId: "…",
-  //   appId: "…"
-  // },
+  // Firebase web config for the TRUCK SSC Portal project. These values identify the
+  // project to the browser; they are not secrets. Access is controlled by sign-in and
+  // by firestore.rules / storage.rules.
+  firebase: {
+    apiKey: "AIzaSyBMzEM_EuUBoc2Eazlnmr-mffx1Xuc0xmo",
+    authDomain: "truck-ssc-portal.firebaseapp.com",
+    projectId: "truck-ssc-portal",
+    storageBucket: "truck-ssc-portal.firebasestorage.app",
+    messagingSenderId: "463148473740",
+    appId: "1:463148473740:web:f6ba87f00a973d27950aa9"
+  },
 
   // Email addresses allowed to open the Admin page (upload board data and files).
   admins: ["brett@truckgloves.com", "brett.keyes72@gmail.com"],

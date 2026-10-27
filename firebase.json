@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "public",
-    "ignore": ["**/.*"],
+    "ignore": ["**/.*", "data/board.json", "files/**"],
     "headers": [
       { "source": "data/**", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       { "source": "**/*.@(js|css|html)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
