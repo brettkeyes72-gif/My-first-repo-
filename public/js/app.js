@@ -866,13 +866,23 @@ function renderSignIn() {
       <label>${esc(t("email"))}<input id="em" type="email" autocomplete="username" dir="ltr"></label>
       <label>${esc(t("password"))}<input id="pw" type="password" autocomplete="current-password" dir="ltr"></label>
       <button class="bigbtn green" id="go" type="button"><span><b>${esc(t("signIn"))}</b></span></button>
+      <button class="linkbtn" id="forgot" type="button">${esc(t("forgot"))}</button>
       <p class="err" id="err"></p>
+      <p class="sentok" id="ok" hidden></p>
     </section>`;
   const go = async () => {
     try { await store.signIn(document.getElementById("em").value.trim(), document.getElementById("pw").value); }
     catch (e) { document.getElementById("err").textContent = t("signInError"); }
   };
   document.getElementById("go").onclick = go;
+  document.getElementById("forgot").onclick = async () => {
+    const email = document.getElementById("em").value.trim();
+    const err = document.getElementById("err"), ok = document.getElementById("ok");
+    err.textContent = ""; ok.hidden = true;
+    if (!email) { err.textContent = t("forgotNeedEmail"); return; }
+    try { await store.resetPassword(email); ok.textContent = t("forgotSent"); ok.hidden = false; }
+    catch (e) { err.textContent = t("signInError"); }
+  };
   document.getElementById("pw").onkeydown = e => { if (e.key === "Enter") go(); };
 }
 

@@ -37,6 +37,11 @@ export async function signIn(email, password) {
   await f.a.signInWithEmailAndPassword(f.auth, email, password);
 }
 
+export async function resetPassword(email) {
+  const f = await firebase();
+  await f.a.sendPasswordResetEmail(f.auth, email);
+}
+
 export async function signOut() {
   const f = await firebase();
   await f.a.signOut(f.auth);
