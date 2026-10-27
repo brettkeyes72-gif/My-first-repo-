@@ -411,3 +411,28 @@ textarea:focus, input:focus, select:focus { border-color: var(--rust); outline: 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 /* on phones the header scrolls away so the page gets the whole screen */
 @media (max-width: 560px) { header.top { position: static; } }
+
+/* ---------- shipped / part shipped ---------- */
+.arrived { display: flex; gap: 16px; align-items: flex-start; background: var(--green-soft); border: 3px solid var(--green); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 22px; }
+.arrived > .ic { color: var(--green); }
+.arrived h2 { color: var(--green-ink); font-size: 24px; text-transform: uppercase; }
+html[dir="rtl"] .arrived h2 { text-transform: none; }
+.arrived p { margin: 4px 0 0; }
+.progress { height: 14px; border-radius: 999px; background: var(--gray-soft); overflow: hidden; margin-top: 10px; max-width: 360px; }
+.progress span { display: block; height: 100%; background: var(--green); border-radius: 999px; }
+.progtxt { margin: 6px 0 0; font-size: 15px; color: var(--ink-2); }
+.progtxt b { color: var(--ink); }
+.ribbon.green { background: var(--green); }
+.ribbon.blue { background: var(--blue); }
+.glovecard.sent { border-color: var(--green); opacity: .85; }
+.glovecard.sent .gc-pairs b { color: var(--green-ink); }
+.sz.done { background: var(--green-soft); }
+.sz.done em { background: var(--green); color: #fff; }
+.sz.part em { background: var(--blue); }
+.sz s { text-decoration: none; font-size: 11px; font-weight: 800; color: var(--green-ink); margin-top: 2px; }
+.shiprow { padding: 12px 0; border-top: 2px solid var(--line); }
+.shiprow:first-of-type { border-top: 0; }
+.sr-top { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sr-top b { font-family: var(--head); font-size: 22px; }
+.shiprow p { margin: 6px 0; }
+.shiprow ul { margin: 0; padding-inline-start: 20px; font-size: 15px; color: var(--ink-2); }

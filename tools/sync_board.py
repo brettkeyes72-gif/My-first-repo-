@@ -17,6 +17,19 @@ upload on the site's Admin page (live mode) or save as public/data/board.json
       "samples": {"<sample id>": {"detail": "…", "note": "…"}}
     }
 Any field left out simply shows in English.
+
+--patch applies updates this site knows about that the production board does not
+yet carry (shipments received, fresh Shopify stock, new notes). Format:
+    {
+      "set":       {"shipments": [...]},              top-level keys, replaced
+      "notes":     {"production": "…"},               merged into board notes
+      "pos":       {"<po id>": {"field": value}},     merged into that PO
+      "custom":    {"<id>": {...}}, "samples": {"<id>": {...}},
+      "add":       {"samples": [...], "custom": [...]},  new items, appended
+      "changelog": [{"date": "…", "items": [...], "ur": [...]}],  put first
+      "stock":     {"M1 PRO|Black": {"6": 44, "7": 61}}   TRUCK stock (3rd size column)
+    }
+Patches apply before --urdu, so Urdu can cover patched text too.
 """
 import argparse
 import json
@@ -41,15 +54,43 @@ def merge_urdu(board, ur):
                 item.setdefault("ur", {}).update(by_id[item["id"]])
 
 
+def apply_patch(board, pa):
+    board.update(pa.get("set", {}))
+    board.setdefault("notes", {}).update(pa.get("notes", {}))
+    for key in ("pos", "custom", "samples"):
+        by_id = pa.get(key, {})
+        for item in board.get(key, []):
+            if item.get("id") in by_id:
+                item.update(by_id[item["id"]])
+        board.setdefault(key, []).extend(pa.get("add", {}).get(key, []))
+    if pa.get("changelog"):
+        board["changelog"] = pa["changelog"] + board.get("changelog", [])
+    stock = pa.get("stock", {})
+    for po in board.get("pos", []):
+        for line in po.get("lines", []):
+            have = stock.get(f"{line.get('model')}|{line.get('color')}")
+            if not have:
+                continue
+            for row in line.get("sizes", []):
+                if row[0] in have:
+                    while len(row) < 3:
+                        row.append(None)
+                    row[2] = have[row[0]]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("board_html")
     ap.add_argument("out_json")
     ap.add_argument("--urdu")
+    ap.add_argument("--patch")
     a = ap.parse_args()
 
     with open(a.board_html, encoding="utf-8") as f:
         board = extract_state(f.read())
+    if a.patch:
+        with open(a.patch, encoding="utf-8") as f:
+            apply_patch(board, json.load(f))
     if a.urdu:
         with open(a.urdu, encoding="utf-8") as f:
             merge_urdu(board, json.load(f))

@@ -101,8 +101,11 @@ const isPdf = u => /\.pdf(\?|$)/i.test(u || "");
 /* ---------- status ---------- */
 function poStatus(p) {
   if (p.unplaced) return { k: "notPlaced", tone: "gray" };
-  if (p.built) return { k: "built", tone: "blue" };
+  const total = poPairs(p), sent = poShipped(p);
+  if (total && sent >= total) return { k: "shipped", tone: "green", done: true };
   if (p.needsOK) return { k: "needsOkShort", tone: "red" };
+  if (sent) return { k: "partShipped", tone: "blue" };
+  if (p.built) return { k: "built", tone: "blue" };
   return { k: "inProgress", tone: "amber" };
 }
 function stageStatus(stage) {
@@ -120,6 +123,26 @@ const chip = st => `<span class="chip ${st.tone}">${esc(t(st.k))}</span>`;
 function poShip(p) { return p.sscQuoted?.current || p.hard || null; }
 function poPairs(p) { return (p.lines || []).reduce((a, l) => a + linePairs(l), 0); }
 function linePairs(l) { return (l.sizes || []).reduce((a, s) => a + (Number(s[1]) || 0), 0); }
+
+/* ---------- shipments: what has already left SSC ----------
+   board.shipments[] = { id, ref, dispatched, arrived, cartons, pairs, via, note,
+                         lines: [{ po, model, color, sizes: [[size, pairs]] }] }
+   A shipment line counts against the PO line with the same po id, model and colour. */
+const same = (a, b) => (a || "").toLowerCase() === (b || "").toLowerCase();
+function shipmentsFor(p) { return (board?.shipments || []).filter(sh => (sh.lines || []).some(x => x.po === p.id)); }
+function lineShipped(p, l) {
+  const out = {};
+  for (const sh of board?.shipments || [])
+    for (const x of sh.lines || [])
+      if (x.po === p.id && same(x.model, l.model) && same(x.color, l.color))
+        for (const [sz, q] of x.sizes || []) out[sz] = (out[sz] || 0) + (Number(q) || 0);
+  return out;
+}
+function lineShippedPairs(p, l) { return Object.values(lineShipped(p, l)).reduce((a, b) => a + b, 0); }
+function poShipped(p) { return (p.lines || []).reduce((a, l) => a + Math.min(lineShippedPairs(p, l), linePairs(l)), 0); }
+function lastShipment() {
+  return [...(board?.shipments || [])].sort((a, b) => (b.arrived || b.dispatched || "").localeCompare(a.arrived || a.dispatched || ""))[0] || null;
+}
 
 function itemRow(c, label) { return (c.items || []).find(r => (r[0] || "").toLowerCase() === label.toLowerCase()); }
 function customPairs(c) {
@@ -289,6 +312,13 @@ function renderHome() {
       <p>${esc(t("pickArea"))}</p>
     </section>
 
+    ${(() => { const sh = lastShipment(); return sh ? `<section class="arrived">
+      ${icon("production", "big")}
+      <div><h2>${esc(t(sh.arrived ? "shipmentArrived" : "shipmentOnWay"))}</h2>
+        <p><b dir="ltr">${esc(sh.ref)}</b> · ${fmtNum(sh.pairs)} ${esc(t("pairs"))} · ${fmtNum(sh.cartons)} ${esc(t("cartons"))} · ${esc(fmtDate(sh.arrived || sh.dispatched, true))}</p>
+        ${textBlock(sh, "note", "small")}</div>
+    </section>` : ""; })()}
+
     ${needs.length ? `<section class="needs">
       <h2>${icon("alert")} ${esc(t("needsOk"))} <span class="count">${needs.length}</span></h2>
       <div class="needsrow">${needs.map(n => `
@@ -336,14 +366,15 @@ function renderProduction() {
     <div class="cards">
       ${pos.map(p => {
         const pics = (p.lines || []).filter(l => linePairs(l) > 0 || p.unplaced).slice(0, 3);
-        const pairs = poPairs(p);
-        return `<a class="ordercard production ${p.needsOK ? "alert" : ""}" href="#/production/${esc(p.id)}">
+        const pairs = poPairs(p), sent = poShipped(p), st = poStatus(p);
+        return `<a class="ordercard production ${p.needsOK && !st.done ? "alert" : ""} ${st.done ? "done" : ""}" href="#/production/${esc(p.id)}">
           <div class="oc-pics n${Math.max(pics.length, 1)}">${pics.length ? pics.map(l => gloveImg(l.model, l.color)).join("") : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
           <div class="oc-body">
-            <div class="oc-top">${chip(poStatus(p))}</div>
+            <div class="oc-top">${chip(st)}</div>
             <h2 dir="ltr">${esc(p.po)}</h2>
             <p class="oc-label">${esc(pick(p, "label").text)}</p>
             ${pairs ? `<p class="oc-pairs"><b>${fmtNum(pairs)}</b> ${esc(t("pairs"))}</p>` : ""}
+            ${sent ? progressBar(sent, pairs) : ""}
           </div>
           ${datePanel(poShip(p), "shipBy", true)}
         </a>`;
@@ -351,10 +382,21 @@ function renderProduction() {
     </div>`;
 }
 
-function sizeChips(sizes) {
+function progressBar(sent, total) {
+  const pct = total ? Math.min(100, Math.round(sent / total * 100)) : 0;
+  return `<div class="progress"><span style="width:${pct}%"></span></div>
+    <p class="progtxt">✓ <b>${fmtNum(sent)}</b> ${esc(t("shippedOf"))} ${fmtNum(total)} · <b>${fmtNum(Math.max(0, total - sent))}</b> ${esc(t("toGo"))}</p>`;
+}
+
+// shipped = { size: pairs already sent }. A size that is fully sent turns green with a tick.
+function sizeChips(sizes, shipped = {}) {
   const list = (sizes || []).filter(s => Number(s[1]) > 0);
   if (!list.length) return "";
-  return `<div class="sizes">${list.map(s => `<span class="sz"><i>${esc(t("size"))}</i><b>${esc(s[0])}</b><em>${fmtNum(s[1])}</em></span>`).join("")}</div>`;
+  return `<div class="sizes">${list.map(s => {
+    const q = Number(s[1]), sent = Math.min(shipped[s[0]] || 0, q), left = q - sent;
+    const cls = sent && !left ? "done" : sent ? "part" : "";
+    return `<span class="sz ${cls}"><i>${esc(t("size"))}</i><b>${esc(s[0])}</b><em>${sent && !left ? "✓ " + fmtNum(q) : fmtNum(left)}</em>${sent && left ? `<s>✓ ${fmtNum(sent)}</s>` : ""}</span>`;
+  }).join("")}</div>`;
 }
 
 function renderPO(id) {
@@ -362,7 +404,9 @@ function renderPO(id) {
   if (!p) { main().innerHTML = `<p class="empty">${esc(t("notFound"))}</p>`; return; }
   const st = poStatus(p);
   const mand = new Set((p.mandatoryModels || []).map(s => s.toLowerCase()));
-  const lines = [...(p.lines || [])].sort((a, b) => (mand.has(b.model.toLowerCase()) - mand.has(a.model.toLowerCase())) || (a.tier || 9) - (b.tier || 9));
+  const isDone = l => linePairs(l) && lineShippedPairs(p, l) >= linePairs(l);
+  const lines = [...(p.lines || [])].sort((a, b) => (isDone(a) - isDone(b)) || (mand.has(b.model.toLowerCase()) - mand.has(a.model.toLowerCase())) || (a.tier || 9) - (b.tier || 9));
+  const ships = shipmentsFor(p);
   const hist = p.sscQuoted?.history || [];
 
   main().innerHTML = `
@@ -374,12 +418,15 @@ function renderPO(id) {
           <div><span>${esc(t("totalPairs"))}</span><b>${fmtNum(poPairs(p))}</b></div>
           <div><span>${esc(t("poDate"))}</span><b>${esc(fmtDate(p.poDate, true))}</b></div>
           ${p.hard && p.hard !== poShip(p) ? `<div><span>${esc(t("shipByLong"))}</span><b>${esc(fmtDate(p.hard, true))}</b></div>` : ""}
+          ${poShipped(p) ? `<div><span>${esc(t("alreadyShipped"))}</span><b>${fmtNum(poShipped(p))}</b></div><div><span>${esc(t("stillToShip"))}</span><b>${fmtNum(poPairs(p) - poShipped(p))}</b></div>` : ""}
         </div>
       </div>
-      ${datePanel(poShip(p), "shipBy")}
+      ${st.done ? "" : datePanel(poShip(p), poShipped(p) ? "balanceShipBy" : "shipBy")}
     </section>
 
-    ${p.needsOK ? `<section class="todo red">${icon("alert", "big")}<div><h2>${esc(t("whatToDo"))}</h2>${textBlock(p, "needsOKNote")}</div></section>` : ""}
+    ${p.alert ? `<section class="todo amber">${icon("alert", "big")}<div><h2>${esc(pick(p, "alertHead").text || t("heads"))}</h2>${textBlock(p, "alert")}</div></section>` : ""}
+
+    ${p.needsOK && !st.done ? `<section class="todo red">${icon("alert", "big")}<div><h2>${esc(t("whatToDo"))}</h2>${textBlock(p, "needsOKNote")}</div></section>` : ""}
 
     ${p.mandatoryText || mand.size ? `<section class="todo amber"><div><h2>⭐ ${esc(t("priorityText"))}</h2>
       ${mand.size ? `<p class="mands" dir="ltr">${[...(p.mandatoryModels || [])].map(m => `<span>${esc(m)}</span>`).join("")}</p>` : ""}
@@ -393,20 +440,35 @@ function renderPO(id) {
     <h2 class="sech">${esc(t("gloves"))}</h2>
     <div class="glovegrid">
       ${lines.map(l => {
-        const n = linePairs(l), pri = mand.has(l.model.toLowerCase());
-        return `<article class="glovecard ${pri ? "pri" : ""} ${n ? "" : "zero"}">
+        const n = linePairs(l), shipped = lineShipped(p, l), sent = Math.min(lineShippedPairs(p, l), n);
+        const done = n && sent >= n, pri = mand.has(l.model.toLowerCase()) && !done;
+        return `<article class="glovecard ${pri ? "pri" : ""} ${n ? "" : "zero"} ${done ? "sent" : ""}">
           ${pri ? `<span class="ribbon">⭐ ${esc(t("priority"))}</span>` : ""}
+          ${done ? `<span class="ribbon green">✓ ${esc(t("shipped"))}</span>` : sent ? `<span class="ribbon blue">✓ ${fmtNum(sent)} ${esc(t("shipped"))}</span>` : ""}
           <div class="gc-pic">${gloveImg(l.model, l.color, "lg")}</div>
           <div class="gc-body">
             <h3 dir="ltr">${esc(l.model)}</h3>
             <p class="gc-color">${esc(color(l.color))}</p>
             <p class="gc-pairs"><b>${fmtNum(n)}</b> ${esc(t("pairs"))}</p>
-            ${sizeChips(l.sizes)}
+            ${sizeChips(l.sizes, shipped)}
+            ${sent && !done ? `<p class="progtxt"><b>${fmtNum(n - sent)}</b> ${esc(t("toGo"))}</p>` : ""}
             ${textBlock(l, "note", "small")}
           </div>
         </article>`;
       }).join("")}
     </div>
+
+    ${ships.length ? `<section class="card shipments"><h2>${esc(t("shipments"))}</h2>
+      ${ships.map(sh => {
+        const mine = (sh.lines || []).filter(x => x.po === p.id);
+        const n = mine.reduce((a, x) => a + (x.sizes || []).reduce((b, s) => b + (Number(s[1]) || 0), 0), 0);
+        return `<div class="shiprow">
+          <div class="sr-top"><b dir="ltr">${esc(sh.ref)}</b><span class="chip green">${esc(t(sh.arrived ? "arrived" : "onTheWay"))} · ${esc(fmtDate(sh.arrived || sh.dispatched, true))}</span></div>
+          <p>${fmtNum(n)} ${esc(t("pairs"))} ${esc(t("fromThisPo"))}${sh.via ? ` · <span dir="auto">${esc(pick(sh, "via").text)}</span>` : ""}</p>
+          <ul>${mine.map(x => `<li dir="ltr">${esc(x.model)} ${esc(x.color)} — ${(x.sizes || []).map(s => `${esc(s[0])}:${fmtNum(s[1])}`).join(" · ")}</li>`).join("")}</ul>
+        </div>`;
+      }).join("")}
+    </section>` : ""}
 
     ${(p.amended || p.specialTerms || p.payTerms) ? `<section class="card notes">
       <h2>${esc(t("notes"))}</h2>

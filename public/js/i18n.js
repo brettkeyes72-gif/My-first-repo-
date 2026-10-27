@@ -125,7 +125,21 @@ const STR = {
     offline: "No internet — showing the last saved copy.",
     notFound: "Not found",
     case: "case",
-    stock: "TRUCK has"
+    stock: "TRUCK has",
+    partShipped: "Part shipped",
+    shippedOf: "shipped of",
+    toGo: "still to ship",
+    alreadyShipped: "Already shipped",
+    stillToShip: "Still to ship",
+    balanceShipBy: "Rest ships by",
+    shipments: "Shipments from SSC",
+    shipmentArrived: "Shipment arrived in Salt Lake City",
+    shipmentOnWay: "Shipment on the way",
+    cartons: "cartons",
+    arrived: "Arrived",
+    onTheWay: "On the way",
+    fromThisPo: "from this PO",
+    heads: "Please note"
   },
   ur: {
     langButton: "Read in English",
@@ -247,7 +261,21 @@ const STR = {
     offline: "انٹرنیٹ نہیں — آخری محفوظ کاپی دکھائی جا رہی ہے۔",
     notFound: "نہیں ملا",
     case: "کیس",
-    stock: "TRUCK کے پاس"
+    stock: "TRUCK کے پاس",
+    partShipped: "کچھ حصہ روانہ",
+    shippedOf: "روانہ، کل",
+    toGo: "ابھی بھیجنے ہیں",
+    alreadyShipped: "روانہ ہو چکے",
+    stillToShip: "ابھی بھیجنے ہیں",
+    balanceShipBy: "باقی کی روانگی",
+    shipments: "SSC سے شپمنٹس",
+    shipmentArrived: "شپمنٹ سالٹ لیک سٹی پہنچ گئی",
+    shipmentOnWay: "شپمنٹ راستے میں ہے",
+    cartons: "کارٹن",
+    arrived: "پہنچ گئی",
+    onTheWay: "راستے میں",
+    fromThisPo: "اس PO سے",
+    heads: "براہ کرم توجہ دیں"
   }
 };
 

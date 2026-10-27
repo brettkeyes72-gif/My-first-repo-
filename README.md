@@ -83,6 +83,10 @@ This site reads the board's own data shape, so nothing needs converting:
 - `custom[]`: custom runs, with `stage`, `current` (ship date), `items` rows (`["Sizes", "7:10 · 8:55"]`, `["Needed by", "…"]`), `docs[]` (artwork, PO, font) and `art.url` (the Drive folder).
 - `samples[]`: sample requests with `items`, `stage`, `current` and optional `docs`.
 - Any item can carry `ur: { field: "Urdu text" }`.
+- `shipments[]`: what has left SSC, as `{ ref, dispatched, arrived, cartons, pairs, via, note, lines: [{ po, model, color, sizes }] }`. Lines are counted against the matching PO line. Shipped sizes turn green, each PO shows shipped vs. still to ship, and the newest shipment shows on the home page.
+- Any PO can carry `alert` + `alertHead`, an amber "please note" box (for example barcode or labelling instructions).
+
+`tools/sync_board.py --patch` layers these updates (and fresh Shopify stock) on top of the production board, so they survive the next sync.
 
 Glove photos are matched by model and colour, for example `M1 PRO` + `Brown` → `img/gloves/m1pro-brown.jpg`. To add a model, drop in a photo and add its name to `MODEL_KEYS` / `HAVE` in `js/app.js`.
 
