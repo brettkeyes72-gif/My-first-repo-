@@ -1,0 +1,9 @@
+{
+  "name": "SSC × TRUCK Board",
+  "short_name": "TRUCK SSC",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F4F1EC",
+  "theme_color": "#15181D",
+  "icons": [{ "src": "img/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

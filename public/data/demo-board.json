@@ -1,0 +1,96 @@
+{
+  "_comment": "DEMO DATA — made-up orders that show how the board works. The real board is uploaded from the Admin page (live mode) or saved as data/board.json (kept out of git).",
+  "notes": {
+    "production": "Demo: the winter order ships first. The fill-in order follows.",
+    "custom": "Demo: every custom order shows its artwork big, with the files right underneath.",
+    "samples": "Demo: one pair of each sample, size 9.",
+    "ur": {
+      "production": "ڈیمو: سردیوں کا آرڈر پہلے روانہ ہوگا۔ اضافی آرڈر بعد میں۔",
+      "custom": "ڈیمو: ہر کسٹم آرڈر کا آرٹ ورک بڑا دکھایا جاتا ہے، فائلیں نیچے۔",
+      "samples": "ڈیمو: ہر نمونے کا ایک جوڑا، سائز 9۔"
+    }
+  },
+  "drive": {
+    "root": "https://drive.google.com/",
+    "label": "TRUCK GLOVES_SSC › PURCHASE ORDERS › SSC POs"
+  },
+  "pos": [
+    {
+      "id": "demo-w1",
+      "po": "TRUCK-W2627-01",
+      "label": "Winter 2026–27 · demo order",
+      "poDate": "2026-06-27",
+      "hard": "2026-11-20",
+      "sscQuoted": { "current": "2026-11-20", "history": [ { "date": "2026-11-01", "note": "On the PO" }, { "date": "2026-11-20", "note": "Moved by SSC" } ] },
+      "mandatoryModels": ["M1"],
+      "mandatoryText": "If the whole order cannot ship together, the M1 gloves go first.",
+      "ur": { "label": "سردیاں 2026–27 · ڈیمو آرڈر", "mandatoryText": "اگر پورا آرڈر ایک ساتھ نہ جا سکے تو M1 دستانے پہلے بھیجیں۔" },
+      "doc": { "url": null, "label": "Demo — no PO file" },
+      "lines": [
+        { "id": "l1", "model": "M1", "color": "Black", "tier": 1, "note": "", "sizes": [["6", 20], ["7", 40], ["8", 80], ["9", 100], ["10", 60], ["11", 20]] },
+        { "id": "l2", "model": "M1 PRO", "color": "Brown", "tier": 1, "note": "", "sizes": [["7", 30], ["8", 50], ["9", 60], ["10", 40]] },
+        { "id": "l3", "model": "Palisade", "color": "Bright Orange", "tier": 2, "note": "", "sizes": [["8", 40], ["9", 40], ["10", 40]] },
+        { "id": "l4", "model": "Pro Mitten", "color": "Black", "tier": 3, "note": "", "sizes": [["8", 10], ["9", 15], ["10", 10]] }
+      ]
+    },
+    {
+      "id": "demo-w2",
+      "po": "TRUCK-W2627-02",
+      "label": "Winter 2026–27 · demo fill-in",
+      "poDate": "2026-10-20",
+      "hard": "2026-12-15",
+      "needsOK": true,
+      "needsOKNote": "This is a new PO. Please confirm you can build it and send a ship date.",
+      "ur": { "label": "سردیاں 2026–27 · ڈیمو اضافی آرڈر", "needsOKNote": "یہ نیا PO ہے۔ براہ کرم تصدیق کریں کہ آپ اسے بنا سکتے ہیں اور روانگی کی تاریخ بتائیں۔" },
+      "sscQuoted": { "current": null, "history": [] },
+      "doc": { "url": null, "label": "Demo — no PO file" },
+      "lines": [
+        { "id": "l1", "model": "DRIVER Lined", "color": "Coffee", "tier": 1, "note": "", "sizes": [["8", 50], ["9", 120], ["10", 100], ["11", 30]] },
+        { "id": "l2", "model": "DRIVER Unlined", "color": "Sand", "tier": 2, "note": "", "sizes": [["8", 30], ["9", 50], ["10", 40]] }
+      ]
+    }
+  ],
+  "custom": [
+    {
+      "id": "demo-c1",
+      "name": "Demo Ski Patrol",
+      "account": "Demo Mountain Ski Patrol",
+      "po": "TRUCK-CUS26-99",
+      "stage": "Needs Mansab OK",
+      "ssc": "Paid",
+      "items": [
+        ["60 pr", "M1 PRO — Brown, patrol logo on the knuckle panel of one glove of the pair"],
+        ["Sizes", "7:10 · 8:15 · 9:15 · 10:15 · 11:5"],
+        ["Artwork", "Logo PNG below — make one art sample and send a photo before the full run"],
+        ["Needed by", "Dec 10, 2026"]
+      ],
+      "note": "Please make one art sample first and send a photo for approval.",
+      "ur": { "note": "براہ کرم پہلے ایک آرٹ سیمپل بنائیں اور منظوری کے لیے تصویر بھیجیں۔" },
+      "current": "2026-11-25",
+      "docs": [ { "url": "files/demo-artwork.png", "label": "Logo artwork (PNG)" } ]
+    },
+    {
+      "id": "demo-c2",
+      "name": "Demo Lift Crew",
+      "account": "Demo Resort — Lift Operations",
+      "stage": "Shipped",
+      "items": [ ["100 pr", "DRIVER Lined — Coffee, “CREW” on the cuff"] ],
+      "current": "2026-09-01"
+    }
+  ],
+  "samples": [
+    {
+      "id": "demo-s1",
+      "name": "Demo work samples",
+      "detail": "2 models · 1 pr each, size 9",
+      "ur": { "detail": "2 ماڈل · ہر ایک کا 1 جوڑا، سائز 9" },
+      "stage": "Requested",
+      "current": "2026-11-15",
+      "items": [ ["1 pr", "DRIVER CL5 — Tumbleweed"], ["1 pr", "WG — Black"] ],
+      "note": "Wear-test each pair before it ships."
+    }
+  ],
+  "changelog": [
+    { "date": "2026-10-27", "by": "Demo", "items": ["This is the demo board. Upload the real board from the Admin page."], "ur": ["یہ ڈیمو بورڈ ہے۔ اصل بورڈ ایڈمن صفحے سے اپ لوڈ کریں۔"] }
+  ]
+}

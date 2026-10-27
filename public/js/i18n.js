@@ -1,0 +1,311 @@
+// Every word on the screen, in English and Urdu.
+// Board text written by TRUCK (notes, instructions) can carry its own Urdu
+// in an "ur" field next to the English; see pick() below.
+const STR = {
+  en: {
+    langButton: "اردو میں پڑھیں",
+    langButtonSub: "Read in Urdu",
+    siteName: "SSC × TRUCK",
+    siteSub: "Production board — always live",
+    home: "Home",
+    back: "Back",
+    production: "Production",
+    productionSub: "Stock orders for the season",
+    samples: "Samples",
+    samplesSub: "Sample requests and test pairs",
+    custom: "Custom",
+    customSub: "Gloves with a customer's logo or words",
+    messages: "Messages",
+    messagesSub: "Video, voice and text notes",
+    files: "Files",
+    filesSub: "Every PO, artwork and font",
+    hello: "Salaam, {name}!",
+    helloAnon: "Salaam!",
+    pickArea: "Tap a big button to start.",
+    orders: "orders",
+    projects: "projects",
+    requests: "requests",
+    nextShip: "Next ship date",
+    needsOk: "Waiting for SSC to confirm",
+    needsOkShort: "Needs SSC OK",
+    confirmed: "Confirmed",
+    shipped: "Shipped",
+    quoted: "Quoted — not sent to SSC yet",
+    requested: "Requested",
+    withFactory: "With factory",
+    notPlaced: "Not placed yet",
+    built: "Built — waiting to ship",
+    inProgress: "In progress",
+    shipBy: "Ship by",
+    shipByLong: "Ship no later than",
+    neededBy: "Needed by",
+    poDate: "PO date",
+    noDate: "No date yet",
+    daysLeft: "days left",
+    dayLeft: "day left",
+    today: "Today!",
+    daysLate: "days late",
+    dayLate: "day late",
+    pairs: "pairs",
+    pair: "pair",
+    totalPairs: "Total pairs",
+    size: "Size",
+    sizes: "Sizes",
+    priority: "Ship first",
+    priorityText: "These gloves ship first",
+    whatToDo: "What SSC needs to do",
+    notes: "Notes",
+    englishOnly: "English",
+    downloadPo: "Download PO",
+    noPoFile: "PO file not uploaded yet",
+    open: "Open",
+    download: "Download",
+    artwork: "Artwork",
+    artworkSub: "Tap a picture to see it big",
+    allFiles: "Files for this order",
+    artFolder: "Open art folder (Google Drive)",
+    viewPdf: "Show PDF here",
+    hidePdf: "Hide PDF",
+    gloves: "Gloves on this order",
+    items: "What is in this request",
+    talk: "Talk about this",
+    talkSub: "Leave a video, voice or text note",
+    seeAll: "See all",
+    doneSection: "Finished — already shipped",
+    doneCount: "{n} finished",
+    payments: "Payment",
+    paid: "Paid",
+    notPaid: "Not paid",
+    shipDateHistory: "Ship date history",
+    driveFolders: "Google Drive folders",
+    driveRoot: "All SSC POs",
+    recentUpdates: "What changed",
+    // messages
+    whoAreYou: "Who are you?",
+    whoSub: "Tap your name. We remember it on this phone or computer.",
+    otherName: "Someone else — type your name",
+    save: "Save",
+    change: "Change",
+    you: "You",
+    typeMessage: "Type a message…",
+    send: "Send",
+    recordVideo: "Video note",
+    recordVoice: "Voice note",
+    typeText: "Text",
+    startRec: "Start recording",
+    stopRec: "Stop and send",
+    cancel: "Cancel",
+    recording: "Recording…",
+    sending: "Sending…",
+    sent: "Sent",
+    noMessages: "No messages yet. Be the first — tap Video note!",
+    allTopics: "Everything",
+    general: "General",
+    topic: "About",
+    camError: "Camera or microphone is blocked. Please allow it in your browser and try again.",
+    noRecorder: "This browser cannot record. Please use Chrome on Android or a computer.",
+    demoBanner: "Demo mode — messages are saved on this device only. Connect Firebase to share them (see README).",
+    liveVideoCall: "Start a live video call",
+    liveVideoCallSub: "Opens a free Jitsi call. Share the link on WhatsApp.",
+    // auth
+    signIn: "Sign in",
+    email: "Email",
+    password: "Password",
+    signOut: "Sign out",
+    signInError: "Could not sign in. Check the email and password.",
+    // admin
+    admin: "Admin",
+    adminSub: "Update the board and upload files",
+    uploadBoard: "Upload board data (JSON)",
+    uploadFiles: "Upload files",
+    uploadFilesSub: "Files are saved under the path you type, e.g. files/CUS26-01/",
+    uploaded: "Uploaded",
+    lastUpdated: "Board updated",
+    loading: "Loading…",
+    offline: "No internet — showing the last saved copy.",
+    notFound: "Not found",
+    case: "case",
+    stock: "TRUCK has"
+  },
+  ur: {
+    langButton: "Read in English",
+    langButtonSub: "انگریزی میں پڑھیں",
+    siteName: "SSC × TRUCK",
+    siteSub: "پروڈکشن بورڈ — ہمیشہ تازہ ترین",
+    home: "ہوم",
+    back: "واپس",
+    production: "پروڈکشن",
+    productionSub: "سیزن کے اسٹاک آرڈرز",
+    samples: "نمونے",
+    samplesSub: "نمونوں کی درخواستیں اور ٹیسٹ جوڑے",
+    custom: "کسٹم",
+    customSub: "گاہک کے لوگو یا الفاظ والے دستانے",
+    messages: "پیغامات",
+    messagesSub: "ویڈیو، آواز اور تحریری پیغام",
+    files: "فائلیں",
+    filesSub: "ہر PO، آرٹ ورک اور فونٹ",
+    hello: "السلام علیکم، {name}!",
+    helloAnon: "السلام علیکم!",
+    pickArea: "شروع کرنے کے لیے بڑا بٹن دبائیں۔",
+    orders: "آرڈرز",
+    projects: "پراجیکٹس",
+    requests: "درخواستیں",
+    nextShip: "اگلی روانگی کی تاریخ",
+    needsOk: "SSC کی تصدیق کا انتظار ہے",
+    needsOkShort: "SSC کی منظوری درکار",
+    confirmed: "تصدیق شدہ",
+    shipped: "روانہ ہو چکا",
+    quoted: "قیمت دی گئی — ابھی SSC کو نہیں بھیجا",
+    requested: "درخواست کی گئی",
+    withFactory: "فیکٹری میں",
+    notPlaced: "ابھی آرڈر نہیں دیا گیا",
+    built: "تیار — روانگی کا انتظار",
+    inProgress: "کام جاری ہے",
+    shipBy: "روانگی",
+    shipByLong: "روانگی کی آخری تاریخ",
+    neededBy: "کب تک چاہیے",
+    poDate: "PO کی تاریخ",
+    noDate: "ابھی تاریخ نہیں",
+    daysLeft: "دن باقی",
+    dayLeft: "دن باقی",
+    today: "آج!",
+    daysLate: "دن تاخیر",
+    dayLate: "دن تاخیر",
+    pairs: "جوڑے",
+    pair: "جوڑا",
+    totalPairs: "کل جوڑے",
+    size: "سائز",
+    sizes: "سائز",
+    priority: "پہلے بھیجیں",
+    priorityText: "یہ دستانے سب سے پہلے روانہ ہوں گے",
+    whatToDo: "SSC کو کیا کرنا ہے",
+    notes: "نوٹس",
+    englishOnly: "انگریزی",
+    downloadPo: "PO ڈاؤن لوڈ کریں",
+    noPoFile: "PO فائل ابھی اپ لوڈ نہیں ہوئی",
+    open: "کھولیں",
+    download: "ڈاؤن لوڈ",
+    artwork: "آرٹ ورک",
+    artworkSub: "بڑا دیکھنے کے لیے تصویر دبائیں",
+    allFiles: "اس آرڈر کی فائلیں",
+    artFolder: "آرٹ فولڈر کھولیں (گوگل ڈرائیو)",
+    viewPdf: "PDF یہیں دکھائیں",
+    hidePdf: "PDF چھپائیں",
+    gloves: "اس آرڈر کے دستانے",
+    items: "اس درخواست میں کیا ہے",
+    talk: "اس بارے میں بات کریں",
+    talkSub: "ویڈیو، آواز یا تحریری پیغام چھوڑیں",
+    seeAll: "سب دیکھیں",
+    doneSection: "مکمل — روانہ ہو چکے",
+    doneCount: "{n} مکمل",
+    payments: "ادائیگی",
+    paid: "ادا شدہ",
+    notPaid: "ادا نہیں ہوا",
+    shipDateHistory: "روانگی کی تاریخوں کی تاریخچہ",
+    driveFolders: "گوگل ڈرائیو فولڈرز",
+    driveRoot: "تمام SSC POs",
+    recentUpdates: "کیا تبدیل ہوا",
+    whoAreYou: "آپ کون ہیں؟",
+    whoSub: "اپنا نام دبائیں۔ یہ اس فون یا کمپیوٹر پر یاد رہے گا۔",
+    otherName: "کوئی اور — اپنا نام لکھیں",
+    save: "محفوظ کریں",
+    change: "تبدیل کریں",
+    you: "آپ",
+    typeMessage: "پیغام لکھیں…",
+    send: "بھیجیں",
+    recordVideo: "ویڈیو پیغام",
+    recordVoice: "آواز کا پیغام",
+    typeText: "تحریر",
+    startRec: "ریکارڈنگ شروع کریں",
+    stopRec: "روکیں اور بھیجیں",
+    cancel: "منسوخ",
+    recording: "ریکارڈنگ ہو رہی ہے…",
+    sending: "بھیجا جا رہا ہے…",
+    sent: "بھیج دیا",
+    noMessages: "ابھی کوئی پیغام نہیں۔ پہلا پیغام آپ بھیجیں — ویڈیو پیغام دبائیں!",
+    allTopics: "سب کچھ",
+    general: "عام",
+    topic: "موضوع",
+    camError: "کیمرہ یا مائیکروفون بند ہے۔ براؤزر میں اجازت دیں اور دوبارہ کوشش کریں۔",
+    noRecorder: "یہ براؤزر ریکارڈ نہیں کر سکتا۔ اینڈرائیڈ پر کروم یا کمپیوٹر استعمال کریں۔",
+    demoBanner: "ڈیمو موڈ — پیغامات صرف اسی ڈیوائس پر محفوظ ہیں۔",
+    liveVideoCall: "براہ راست ویڈیو کال شروع کریں",
+    liveVideoCallSub: "مفت Jitsi کال کھلے گی۔ لنک واٹس ایپ پر بھیجیں۔",
+    signIn: "سائن ان",
+    email: "ای میل",
+    password: "پاس ورڈ",
+    signOut: "سائن آؤٹ",
+    signInError: "سائن ان نہیں ہو سکا۔ ای میل اور پاس ورڈ چیک کریں۔",
+    admin: "ایڈمن",
+    adminSub: "بورڈ اپ ڈیٹ کریں اور فائلیں اپ لوڈ کریں",
+    uploadBoard: "بورڈ ڈیٹا اپ لوڈ کریں (JSON)",
+    uploadFiles: "فائلیں اپ لوڈ کریں",
+    uploadFilesSub: "فائلیں اسی راستے پر محفوظ ہوں گی جو آپ لکھیں",
+    uploaded: "اپ لوڈ ہو گیا",
+    lastUpdated: "بورڈ اپ ڈیٹ ہوا",
+    loading: "لوڈ ہو رہا ہے…",
+    offline: "انٹرنیٹ نہیں — آخری محفوظ کاپی دکھائی جا رہی ہے۔",
+    notFound: "نہیں ملا",
+    case: "کیس",
+    stock: "TRUCK کے پاس"
+  }
+};
+
+// Glove colours, so a colour name reads in Urdu too. Model names stay as they are.
+const COLORS_UR = {
+  "Black": "کالا", "Brown": "براؤن", "Gray": "سرمئی", "Grey": "سرمئی",
+  "Bright Yellow": "چمکدار پیلا", "Bright Orange": "چمکدار نارنجی",
+  "Coffee": "کافی", "Silver": "سلور", "Sand": "ریتلا", "Tumbleweed": "ٹمبل ویڈ",
+  "Sunshine": "سن شائن", "Tan": "ٹین"
+};
+
+const KEY = "ssc-truck-lang";
+let lang = "en";
+try { lang = localStorage.getItem(KEY) || "en"; } catch (e) {}
+
+export function getLang() { return lang; }
+
+export function setLang(l) {
+  lang = l;
+  try { localStorage.setItem(KEY, l); } catch (e) {}
+  applyDir();
+}
+
+export function applyDir() {
+  const html = document.documentElement;
+  html.lang = lang;
+  html.dir = lang === "ur" ? "rtl" : "ltr";
+}
+
+export function t(key, vars) {
+  let s = (STR[lang] && STR[lang][key]) ?? STR.en[key] ?? key;
+  if (vars) for (const k in vars) s = s.replace("{" + k + "}", vars[k]);
+  return s;
+}
+
+export function color(c) {
+  return lang === "ur" && COLORS_UR[c] ? COLORS_UR[c] : c;
+}
+
+// Board text: use obj.ur[field] when reading in Urdu and it exists.
+// Returns { text, english } — english=true means we fell back to English.
+export function pick(obj, field) {
+  if (!obj) return { text: "", english: false };
+  const en = obj[field] || "";
+  if (lang === "ur" && obj.ur && obj.ur[field]) return { text: obj.ur[field], english: false };
+  return { text: en, english: lang === "ur" && !!en };
+}
+
+const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_UR = ["جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون", "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر"];
+
+export function fmtDate(iso, withYear) {
+  if (!iso) return t("noDate");
+  const [y, m, d] = iso.split("-").map(Number);
+  const months = lang === "ur" ? MONTHS_UR : MONTHS_EN;
+  return `${d} ${months[m - 1]}${withYear ? " " + y : ""}`;
+}
+
+export function fmtNum(n) {
+  return (n ?? 0).toLocaleString("en-US");
+}
