@@ -628,6 +628,9 @@ function renderSamples() {
 function renderSample(id) {
   const s = (board.samples || []).find(x => x.id === id);
   if (!s) { main().innerHTML = `<p class="empty">${esc(t("notFound"))}</p>`; return; }
+  // rows like ["1 pr", "Fire Lined …"] are things to make; rows like ["Size", "4 in"] are spec details
+  const isThing = r => /^\s*(\d+\s*(pr|pair|pairs|pc|pcs|sample|samples)\b|in hand)/i.test(r[0] || "");
+  const things = (s.items || []).filter(isThing), spec = (s.items || []).filter(r => !isThing(r));
   main().innerHTML = `
     ${pageHead("samples", s.name, pick(s, "detail").text, "#/samples")}
     <section class="hero samples">
@@ -635,11 +638,13 @@ function renderSample(id) {
       ${datePanel(s.current, "neededBy")}
     </section>
     <h2 class="sech">${esc(t("items"))}</h2>
-    <div class="glovegrid">${(s.items || []).map(i => `
+    <div class="glovegrid">${things.map(i => `
       <article class="glovecard">
         <div class="gc-pic">${gloveImg(i[1], i[1], "lg")}</div>
         <div class="gc-body"><p class="gc-pairs"><b dir="ltr">${esc(i[0])}</b></p><h3 class="wrap-ok" dir="ltr">${esc(i[1])}</h3></div>
       </article>`).join("")}</div>
+    ${spec.length ? `<section class="card"><h2>${esc(t("details"))}</h2>
+      <dl class="kv">${spec.map(r => `<dt>${esc(r[0])}</dt><dd dir="auto">${esc(r[1])}</dd>`).join("")}</dl></section>` : ""}
     ${docGallery(s.docs || [])}
     <section class="filesrow">${talkButton("sample:" + s.id)}</section>
     ${s.note ? `<section class="card notes"><h2>${esc(t("notes"))}</h2>${textBlock(s, "note")}</section>` : ""}
