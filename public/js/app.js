@@ -293,7 +293,8 @@ function renderHome() {
   const cusActive = cus.filter(c => !stageStatus(c.stage).done);
   const needs = [
     ...pos.filter(p => p.needsOK).map(p => ({ href: `#/production/${p.id}`, title: p.po, sub: p.label, bucket: "production", img: gloveSrc(p.lines?.[0]?.model, p.lines?.[0]?.color) })),
-    ...cus.filter(c => stageStatus(c.stage).k === "needsOkShort").map(c => ({ href: `#/custom/${c.id}`, title: c.name, sub: c.po || "", bucket: "custom", img: customHero(c) || gloveSrc(customGlove(c)) }))
+    ...cus.filter(c => stageStatus(c.stage).k === "needsOkShort").map(c => ({ href: `#/custom/${c.id}`, title: c.name, sub: c.po || "", bucket: "custom", img: customHero(c) || gloveSrc(customGlove(c)) })),
+    ...smp.filter(s => stageStatus(s.stage).k === "needsOkShort").map(s => ({ href: `#/samples/${s.id}`, title: s.name, sub: pick(s, "detail").text, bucket: "samples", img: (s.docs || []).filter(d => isImage(d.url)).map(store.href)[0] || gloveSrc((s.items || [])[0]?.[1]) }))
   ];
   const recent = messages.filter(m => Date.now() - m.at < 7 * 86400000).length;
 
@@ -613,7 +614,7 @@ function renderSamples() {
     <div class="cards">${list.map(s => {
       const st = stageStatus(s.stage);
       const pics = (s.items || []).map(i => gloveSrc(i[1])).filter(Boolean).slice(0, 3);
-      return `<a class="ordercard samples" href="#/samples/${esc(s.id)}">
+      return `<a class="ordercard samples ${st.k === "needsOkShort" ? "alert" : ""}" href="#/samples/${esc(s.id)}">
         <div class="oc-pics n${Math.max(pics.length, 1)}">${pics.length ? pics.map(src => `<img class="glove" src="${src}" alt="" loading="lazy">`).join("") : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
         <div class="oc-body">
           <div class="oc-top">${chip(st)}</div>
@@ -637,6 +638,7 @@ function renderSample(id) {
       <div class="hero-l">${chip(stageStatus(s.stage))}</div>
       ${datePanel(s.current, "neededBy")}
     </section>
+    ${stageStatus(s.stage).k === "needsOkShort" && (s.needsOKNote || s.ur?.needsOKNote) ? `<section class="todo red">${icon("alert", "big")}<div><h2>${esc(t("whatToDo"))}</h2>${textBlock(s, "needsOKNote")}</div></section>` : ""}
     <h2 class="sech">${esc(t("items"))}</h2>
     <div class="glovegrid">${things.map(i => `
       <article class="glovecard">
