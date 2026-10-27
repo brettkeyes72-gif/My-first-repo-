@@ -47,7 +47,7 @@ The demo board loads by default. To see real data on your own machine, put a rea
 Firebase is Google's hosting. It loads well in Pakistan: Google has serving locations in Karachi and Lahore, and the site doesn't depend on anything that's commonly blocked there. One free Firebase project covers the website, the shared board, the messages and the video and file storage.
 
 1. Create a project at <https://console.firebase.google.com>, for example `truck-ssc`.
-2. **Authentication → Sign-in method:** turn on **Email/Password**. Under **Users**, add one login per person (Brett, Mansab, Imran, …).
+2. **Authentication → Sign-in method:** turn on **Email/Password**. Under **Users**, add one login per person (Brett, Mansab, Seqlain, …).
 3. Create a **Firestore Database** (production mode) and **Storage**. Choose a region close to both of you; `asia-south1` (Mumbai) or `europe-west` both work well.
 4. **Project settings → Your apps → Web app.** Copy the config object into `firebase:` in `public/js/config.js`.
 5. Deploy the site and the security rules:

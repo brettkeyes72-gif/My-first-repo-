@@ -25,7 +25,7 @@ export const CONFIG = {
   people: [
     { name: "Brett", org: "TRUCK" },
     { name: "Mansab", org: "SSC" },
-    { name: "Imran", org: "SSC" }
+    { name: "Seqlain", org: "SSC" }
   ],
 
   // Longest video note, in seconds. Short keeps uploads quick on slow connections.
