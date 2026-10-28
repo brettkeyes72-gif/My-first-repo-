@@ -471,3 +471,5 @@ html[dir="rtl"] .arrived h2 { text-transform: none; }
 .sr-top b { font-family: var(--head); font-size: 22px; }
 .shiprow p { margin: 6px 0; }
 .shiprow ul { margin: 0; padding-inline-start: 20px; font-size: 15px; color: var(--ink-2); }
+.glove.ph.artph { display: grid; place-items: center; text-align: center; padding: 16px; font-family: var(--head); font-size: 18px; letter-spacing: .04em; color: var(--ink-3); border: 3px dashed var(--line); border-radius: 14px; }
+.oc-pics.art .glove { object-fit: contain; }

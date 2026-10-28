@@ -113,6 +113,7 @@ async function resolveFiles(board) {
   };
   for (const p of board.pos || []) fix(p.doc);
   for (const c of [...(board.custom || []), ...(board.samples || [])]) (c.docs || []).forEach(fix);
+  for (const smp of board.samples || []) fix(smp.image);
   await Promise.all(jobs);
 }
 

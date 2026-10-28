@@ -294,7 +294,7 @@ function renderHome() {
   const needs = [
     ...pos.filter(p => p.needsOK).map(p => ({ href: `#/production/${p.id}`, title: p.po, sub: p.label, bucket: "production", img: gloveSrc(p.lines?.[0]?.model, p.lines?.[0]?.color) })),
     ...cus.filter(c => stageStatus(c.stage).k === "needsOkShort").map(c => ({ href: `#/custom/${c.id}`, title: c.name, sub: c.po || "", bucket: "custom", img: customHero(c) || gloveSrc(customGlove(c)) })),
-    ...smp.filter(s => stageStatus(s.stage).k === "needsOkShort").map(s => ({ href: `#/samples/${s.id}`, title: s.name, sub: pick(s, "detail").text, bucket: "samples", img: (s.docs || []).filter(d => isImage(d.url)).map(store.href)[0] || gloveSrc((s.items || [])[0]?.[1]) }))
+    ...smp.filter(s => stageStatus(s.stage).k === "needsOkShort").map(s => ({ href: `#/samples/${s.id}`, title: s.name, sub: pick(s, "detail").text, bucket: "samples", img: sampleHero(s) || (notGlove(s) ? null : gloveSrc((s.items || [])[0]?.[1])) }))
   ];
   const recent = messages.filter(m => Date.now() - m.at < 7 * 86400000).length;
 
@@ -613,9 +613,10 @@ function renderSamples() {
     ${textBlock(board.notes ? { note: board.notes.samples, ur: { note: board.notes.ur?.samples } } : null, "note", "boardnote")}
     <div class="cards">${list.map(s => {
       const st = stageStatus(s.stage);
-      const pics = (s.items || []).map(i => gloveSrc(i[1])).filter(Boolean).slice(0, 3);
+      const hero = sampleHero(s);
+      const pics = hero ? [hero] : notGlove(s) ? [] : (s.items || []).filter(isThing).map(i => gloveSrc(i[1])).filter(Boolean).slice(0, 3);
       return `<a class="ordercard samples ${st.k === "needsOkShort" ? "alert" : ""}" href="#/samples/${esc(s.id)}">
-        <div class="oc-pics n${Math.max(pics.length, 1)}">${pics.length ? pics.map(src => `<img class="glove" src="${src}" alt="" loading="lazy">`).join("") : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
+        <div class="oc-pics n${Math.max(pics.length, 1)} ${hero ? "art" : ""}">${pics.length ? pics.map(src => `<img class="glove" src="${src}" alt="" loading="lazy">`).join("") : notGlove(s) ? `<div class="glove ph artph">${esc(t("artworkComing"))}</div>` : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
         <div class="oc-body">
           <div class="oc-top">${chip(st)}</div>
           <h2>${esc(s.name)}</h2>
@@ -626,11 +627,23 @@ function renderSamples() {
     }).join("")}</div>`;
 }
 
+// rows like ["1 pr", "Fire Lined …"] are things to make; rows like ["Size", "4 in"] are spec details
+const isThing = r => /^\s*(\d+\s*(pr|pair|pairs|pc|pcs|sample|samples)\b|in hand)/i.test(r[0] || "");
+
+// Stickers, labels and the like: never guess a glove photo for them.
+const notGlove = s => /sticker|decal|label|patch|tag/i.test(s.name || "");
+
+// A sample's own picture (e.g. sticker artwork) beats a guessed glove photo.
+function sampleHero(s) {
+  if (s.image) return store.href(s.image);
+  const d = (s.docs || []).find(x => isImage(x.url) && store.href(x));
+  return d ? store.href(d) : null;
+}
+
 function renderSample(id) {
   const s = (board.samples || []).find(x => x.id === id);
   if (!s) { main().innerHTML = `<p class="empty">${esc(t("notFound"))}</p>`; return; }
-  // rows like ["1 pr", "Fire Lined …"] are things to make; rows like ["Size", "4 in"] are spec details
-  const isThing = r => /^\s*(\d+\s*(pr|pair|pairs|pc|pcs|sample|samples)\b|in hand)/i.test(r[0] || "");
+  const hero = sampleHero(s);
   const things = (s.items || []).filter(isThing), spec = (s.items || []).filter(r => !isThing(r));
   main().innerHTML = `
     ${pageHead("samples", s.name, pick(s, "detail").text, "#/samples")}
@@ -642,7 +655,7 @@ function renderSample(id) {
     <h2 class="sech">${esc(t("items"))}</h2>
     <div class="glovegrid">${things.map(i => `
       <article class="glovecard">
-        <div class="gc-pic">${gloveImg(i[1], i[1], "lg")}</div>
+        <div class="gc-pic">${hero ? `<button class="zoom" data-src="${esc(hero)}" type="button"><img class="glove lg" src="${esc(hero)}" alt="${esc(s.name)}"></button>` : notGlove(s) ? `<div class="glove ph artph">${esc(t("artworkComing"))}</div>` : gloveImg(i[1], i[1], "lg")}</div>
         <div class="gc-body"><p class="gc-pairs"><b dir="ltr">${esc(i[0])}</b></p><h3 class="wrap-ok" dir="ltr">${esc(i[1])}</h3></div>
       </article>`).join("")}</div>
     ${spec.length ? `<section class="card"><h2>${esc(t("details"))}</h2>
