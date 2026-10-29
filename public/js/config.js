@@ -30,6 +30,9 @@ export const CONFIG = {
     { name: "Seqlain", org: "SSC" }
   ],
 
+  // Public half of the Web Push key pair (the private half is the VAPID_PRIVATE secret).
+  vapidKey: "BEzIBFHdwvhMDP5sX-bcLeCD1VX951xF6Pz9eekYf_SehSScoCcRgB9flbbscSw-tq9r7QUAyZj1e7aVz4nVkFg",
+
   // Longest video note, in seconds. Short keeps uploads quick on slow connections.
   maxVideoSeconds: 120,
 

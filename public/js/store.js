@@ -139,6 +139,47 @@ export async function uploadFile(path, file, onProgress) {
   return path;
 }
 
+/* ---------------- alerts (Web Push) ---------------- */
+
+export const PUSH_OK = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+
+function swReady() {
+  if (!swReady.p) swReady.p = navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready);
+  return swReady.p;
+}
+
+// Is this device already signed up for alerts?
+export async function pushStatus() {
+  if (!LIVE || !PUSH_OK) return "unsupported";
+  if (Notification.permission === "denied") return "blocked";
+  const reg = await swReady();
+  return (await reg.pushManager.getSubscription()) && Notification.permission === "granted" ? "on" : "off";
+}
+
+function keyBytes(b64) {
+  const s = atob((b64 + "=".repeat((4 - b64.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(s, c => c.charCodeAt(0));
+}
+
+async function subId(endpoint) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(endpoint));
+  return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 40);
+}
+
+// Ask permission, subscribe this device and save it so the server can reach it.
+export async function turnOnPush(who) {
+  if (await Notification.requestPermission() !== "granted") throw new Error("permission");
+  const reg = await swReady();
+  const sub = await reg.pushManager.getSubscription()
+    || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(CONFIG.vapidKey) });
+  const f = await firebase();
+  const json = JSON.parse(JSON.stringify(sub));
+  await f.m.setDoc(f.m.doc(f.db, "pushsubs", await subId(json.endpoint)), {
+    sub: json, uid: f.auth.currentUser?.uid || "", email: f.auth.currentUser?.email || "",
+    name: who?.name || "", org: who?.org || "", at: Date.now()
+  });
+}
+
 /* ---------------- messages ---------------- */
 
 // A message: { id, at (ms), name, org, topic, kind: "text"|"video"|"audio", text, url|blob, mime }

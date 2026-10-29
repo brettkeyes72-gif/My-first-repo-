@@ -11,6 +11,11 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if admin();
     }
+    // One Web Push subscription per device; only the server reads them.
+    match /pushsubs/{id} {
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
     match /messages/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;

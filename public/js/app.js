@@ -51,7 +51,8 @@ const ICON = {
   drive: '<path d="M8 4h8l5 9-4 7H7l-4-7z"/><path d="M8 4l5 9h8M3 13h10l-6 7"/>',
   admin: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   call: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
-  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>'
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>'
 };
 const icon = (k, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
@@ -218,6 +219,42 @@ function msgSnippet(m) {
   return m.text || t(m.kind === "video" ? "videoNote" : m.kind === "audio" ? "voiceNote" : "message");
 }
 
+/* ---------- alerts on this device ---------- */
+let pushState = null; // "on" | "off" | "blocked" | "unsupported", once known
+const IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const STANDALONE = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+// Fills every <div data-alerts> on the page. "home" boxes hide once alerts are on.
+function drawAlerts() {
+  document.querySelectorAll("[data-alerts]").forEach(el => {
+    const home = el.dataset.alerts === "home";
+    let st = pushState;
+    if (store.LIVE && IOS && !STANDALONE) st = "ios";
+    if (!st || (st === "unsupported" && !(store.LIVE && IOS)) || (home && st === "on")) { el.innerHTML = ""; return; }
+    const body = {
+      off: `<p>${esc(t("alertsSub"))}</p><button class="bigbtn red" type="button" id="alertsbtn">${icon("bell")}<span><b>${esc(t("alertsBtn"))}</b></span></button>`,
+      on: `<p class="ok">✓ ${esc(t("alertsOn"))}</p>`,
+      blocked: `<p>${esc(t("alertsBlocked"))}</p>`,
+      ios: `<p>${esc(t("alertsSub"))}</p><ol class="iosteps"><li>${esc(t("alertsIos1"))}</li><li>${esc(t("alertsIos2"))}</li><li>${esc(t("alertsIos3"))}</li></ol>`,
+      unsupported: `<p>${esc(t("alertsNo"))}</p>`
+    }[st];
+    el.innerHTML = `<section class="alertsbox ${st}"><h2>${icon("bell")} ${esc(t("alertsTitle"))}</h2>${body}<p class="alertsmsg" id="alertsmsg"></p></section>`;
+    const b = el.querySelector("#alertsbtn");
+    if (b) b.onclick = async () => {
+      b.disabled = true;
+      const msg = el.querySelector("#alertsmsg");
+      msg.textContent = t("alertsWorking");
+      try { await store.turnOnPush(me()); pushState = "on"; drawAlerts(); }
+      catch (e) {
+        pushState = await store.pushStatus().catch(() => "off");
+        if (pushState === "blocked") return drawAlerts();
+        b.disabled = false;
+        msg.textContent = e.message === "permission" ? t("alertsAllow") : t("alertsFail", { e: e.message });
+      }
+    };
+  });
+}
+
 function talkSection(topic) {
   return `<section class="card thread" data-thread="${esc(topic)}">${threadHtml(topic)}</section>`;
 }
@@ -317,6 +354,7 @@ function route() {
   drawPage(a, b, q);
   drawThreads();
   updateBadge();
+  drawAlerts();
 }
 
 function drawPage(a, b, q) {
@@ -373,6 +411,8 @@ function renderHome() {
       <h1>${esc(who ? t("hello", { name: who.name }) : t("helloAnon"))}</h1>
       <p>${esc(t("pickArea"))}</p>
     </section>
+
+    <div data-alerts="home"></div>
 
     ${(() => { const sh = lastShipment(); return sh ? `<section class="arrived">
       ${icon("production", "big")}
@@ -809,6 +849,8 @@ function renderMessages(topic) {
 
     <div id="feed" class="feed"></div>
 
+    <div data-alerts="messages"></div>
+
     <a class="bigbtn gray callbtn" href="https://meet.jit.si/TRUCK-SSC-${encodeURIComponent((topic || "general").replace(/[^a-z0-9]/gi, "-"))}" target="_blank" rel="noopener">${icon("call")}<span><b>${esc(t("liveVideoCall"))}</b><i>${esc(t("liveVideoCallSub"))}</i></span></a>
   `;
   document.getElementById("changeme").onclick = () => renderWho(() => renderMessages(topic), true);
@@ -1035,6 +1077,7 @@ store.watchUser(u => {
   user = u;
   route();
   if (store.LIVE && !u) return;
+  if (store.LIVE && store.PUSH_OK) store.pushStatus().then(st => { pushState = st; drawAlerts(); }).catch(() => {});
   store.watchBoard((b, info) => { board = b; boardOffline = !!info.offline; refresh(); });
   store.watchMessages(list => {
     messages = list;

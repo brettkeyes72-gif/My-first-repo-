@@ -1,22 +1,30 @@
-// Email the other side whenever someone leaves a message on the board.
+// Two alerts go out whenever someone leaves a message on the board:
 //
-// Who gets emailed lives in Firestore at settings/notify (not in this public repo):
-//   { "from": "brett@…", "TRUCK": ["brett@…"], "SSC": ["mansab@…", "…"], "off": false }
-// A message from SSC goes to the TRUCK list and the other way round.
-// Mail goes out through Brevo (brevo.com); its API key is the BREVO_KEY secret, and
-// "from" must be a sender verified in the Brevo account.
+// 1. Email to the other side, through Brevo (brevo.com). Who gets emailed lives in
+//    Firestore at settings/notify (not in this public repo):
+//      { "from": "brett@…", "TRUCK": ["brett@…"], "SSC": ["mansab@…"], "off": false }
+//    A message from SSC goes to the TRUCK list and the other way round. The Brevo API
+//    key is the BREVO_KEY secret; "from" must be a sender verified in Brevo.
+//
+// 2. A phone / computer notification to everyone else on the board whenever
+// someone leaves a message.
+//
+// Each device that taps "Turn on alerts" saves a Web Push subscription in
+// Firestore at pushsubs/{id} = { sub, uid, name, org, at }. When a message is
+// created, every subscription except the sender's own gets a notification.
+// The VAPID private key is the VAPID_PRIVATE secret; the public half is
+// CONFIG.vapidKey in public/js/config.js.
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
+const webpush = require("web-push");
 
 admin.initializeApp();
+const VAPID_PRIVATE = defineSecret("VAPID_PRIVATE");
 const BREVO_KEY = defineSecret("BREVO_KEY");
+const VAPID_PUBLIC = "BEzIBFHdwvhMDP5sX-bcLeCD1VX951xF6Pz9eekYf_SehSScoCcRgB9flbbscSw-tq9r7QUAyZj1e7aVz4nVkFg";
 const SITE = "https://truck-ssc-portal.web.app/";
-
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-}
 
 // "custom:c4" → { label: "Park City Ski Patrol", link: "…#/custom/c4" }
 function where(topic, board) {
@@ -28,6 +36,41 @@ function where(topic, board) {
     label: item ? item.po || item.name : "General",
     link: SITE + (page && item ? `#/${page}/${id}` : `#/messages?topic=${encodeURIComponent(topic || "general")}`)
   };
+}
+
+exports.notifyOnMessage = onDocumentCreated(
+  { document: "messages/{id}", region: "asia-south1", secrets: [VAPID_PRIVATE] },
+  async event => {
+    const m = event.data?.data();
+    if (!m) return;
+    const db = admin.firestore();
+    const [subs, boardDoc] = await Promise.all([db.collection("pushsubs").get(), db.doc("board/current").get()]);
+    const board = boardDoc.exists ? JSON.parse(boardDoc.data().json) : {};
+    const w = where(m.topic, board);
+    const what = m.kind === "video" ? "🎥 Video note" : m.kind === "audio" ? "🎙 Voice note" : "";
+    const payload = JSON.stringify({
+      title: `${m.name} (${m.org || "?"}) · ${w.label}`,
+      body: [what, m.text].filter(Boolean).join(" — ").slice(0, 180) || "New message",
+      url: w.link,
+      tag: m.topic || "general"
+    });
+
+    webpush.setVapidDetails("mailto:brett@truckgloves.com", VAPID_PUBLIC, VAPID_PRIVATE.value());
+    const targets = subs.docs.filter(d => d.data().uid !== m.uid);
+    const results = await Promise.allSettled(targets.map(d =>
+      webpush.sendNotification(d.data().sub, payload, { TTL: 7 * 86400, urgency: "high" }).catch(async err => {
+        // 404/410: the browser dropped this subscription; forget it.
+        if (err.statusCode === 404 || err.statusCode === 410) await d.ref.delete();
+        throw err;
+      })));
+    const failed = results.filter(r => r.status === "rejected");
+    failed.forEach(r => logger.warn("push failed", r.reason?.statusCode, r.reason?.body || r.reason?.message));
+    logger.info(`pushed ${targets.length - failed.length}/${targets.length} for`, event.params.id);
+  }
+);
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
 exports.emailOnMessage = onDocumentCreated(
