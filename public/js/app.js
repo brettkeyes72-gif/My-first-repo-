@@ -52,6 +52,8 @@ const ICON = {
   admin: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   call: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>'
 };
 // Built-in line icons until the TRUCK icon set is ready. To switch, put one SVG per name
@@ -1071,7 +1073,11 @@ function renderSignIn() {
       <img class="logo" src="img/truck-logo.png" alt="TRUCK">
       <h1>${esc(t("signIn"))}</h1>
       <label>${esc(t("email"))}<input id="em" type="email" autocomplete="username" dir="ltr"></label>
-      <label>${esc(t("password"))}<input id="pw" type="password" autocomplete="current-password" dir="ltr"></label>
+      <label for="pw">${esc(t("password"))}</label>
+      <div class="pwrow">
+        <input id="pw" type="password" autocomplete="current-password" dir="ltr">
+        <button class="pwshow" id="pwshow" type="button" aria-controls="pw" aria-pressed="false">${icon("eye")}<span>${esc(t("showPw"))}</span></button>
+      </div>
       <button class="bigbtn green" id="go" type="button"><span><b>${esc(t("signIn"))}</b></span></button>
       <button class="linkbtn" id="forgot" type="button">${esc(t("forgot"))}</button>
       <p class="err" id="err"></p>
@@ -1091,6 +1097,13 @@ function renderSignIn() {
     catch (e) { err.textContent = t("signInError"); }
   };
   document.getElementById("pw").onkeydown = e => { if (e.key === "Enter") go(); };
+  document.getElementById("pwshow").onclick = e => {
+    const pw = document.getElementById("pw"), b = e.currentTarget, show = pw.type === "password";
+    pw.type = show ? "text" : "password";
+    b.setAttribute("aria-pressed", show);
+    b.innerHTML = `${icon(show ? "eyeoff" : "eye")}<span>${esc(t(show ? "hidePw" : "showPw"))}</span>`;
+    pw.focus();
+  };
 }
 
 function renderAdmin() {

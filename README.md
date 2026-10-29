@@ -96,7 +96,7 @@ The styling follows truckgloves.com: white pages, Oswald uppercase headings, Pop
 
 The site ships with a simple built-in line icon set. To switch to the TRUCK icon set, put one SVG per name in `public/img/icons/` and set `iconSet: "img/icons/"` in `public/js/config.js`. Each icon is drawn in the text colour around it, so single-colour SVGs work best. Names used:
 
-`home` `production` `custom` `samples` `messages` `files` `admin` `back` `video` `mic` `text` `download` `doc` `drive` `call` `alert` `bell`
+`home` `production` `custom` `samples` `messages` `files` `admin` `back` `video` `mic` `text` `download` `doc` `drive` `call` `alert` `bell` `eye` `eyeoff`
 
 ## Alerts
 

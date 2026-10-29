@@ -542,6 +542,13 @@ textarea:focus, input:focus, select:focus { border-color: var(--ink); outline: 0
 .signin .logo { height: 36px; align-self: center; }
 .signin label { text-align: start; font-weight: 600; display: flex; flex-direction: column; gap: 6px; }
 .signin .bigbtn { justify-content: center; }
+.signin > label[for] { margin-bottom: -8px; }
+.pwrow { display: flex; align-items: stretch; }
+.pwrow input { flex: 1 1 auto; min-width: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
+.pwshow { appearance: none; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; min-width: 96px; justify-content: center; border: 1px solid var(--line-2); border-inline-start: 0; border-start-end-radius: var(--r-btn); border-end-end-radius: var(--r-btn); background: var(--surface-2); color: var(--ink); cursor: pointer; font-family: var(--head); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.pwshow:hover { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.pwshow .ic { width: 20px; height: 20px; }
+html[dir="rtl"] .pwshow { font-family: "Noto Nastaliq Urdu", var(--font); letter-spacing: 0; font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 /* on phones the header scrolls away so the page gets the whole screen */
