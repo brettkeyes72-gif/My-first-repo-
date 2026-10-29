@@ -33,6 +33,9 @@ export const CONFIG = {
   // Public half of the Web Push key pair (the private half is the VAPID_PRIVATE secret).
   vapidKey: "BEzIBFHdwvhMDP5sX-bcLeCD1VX951xF6Pz9eekYf_SehSScoCcRgB9flbbscSw-tq9r7QUAyZj1e7aVz4nVkFg",
 
+  // Folder of TRUCK icons (one SVG per name, e.g. "img/icons/"), or null for the built-in set.
+  iconSet: null,
+
   // Longest video note, in seconds. Short keeps uploads quick on slow connections.
   maxVideoSeconds: 120,
 

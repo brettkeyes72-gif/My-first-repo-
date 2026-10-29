@@ -90,6 +90,19 @@ This site reads the board's own data shape, so nothing needs converting:
 
 Glove photos are matched by model and colour, for example `M1 PRO` + `Brown` → `img/gloves/m1pro-brown.jpg`. To add a model, drop in a photo and add its name to `MODEL_KEYS` / `HAVE` in `js/app.js`.
 
+## Look and icons
+
+The styling follows truckgloves.com: white pages, Oswald uppercase headings, Poppins body, square black buttons, rust accents and a near-black band for the TRUCK / SSC message panel at the top of the home page. Category colours mark each area (Production = Work rust, Custom = Snow blue, Samples = Bike charcoal, Messages = sand, Files = leather). Everything lives in `public/css/app.css`.
+
+The site ships with a simple built-in line icon set. To switch to the TRUCK icon set, put one SVG per name in `public/img/icons/` and set `iconSet: "img/icons/"` in `public/js/config.js`. Each icon is drawn in the text colour around it, so single-colour SVGs work best. Names used:
+
+`home` `production` `custom` `samples` `messages` `files` `admin` `back` `video` `mic` `text` `download` `doc` `drive` `call` `alert` `bell`
+
+## Alerts
+
+- **Phone / computer alerts:** each person taps **Turn on alerts** once per device. On iPhone, add the board to the Home Screen first (Safari → Share → Add to Home Screen). The `notifyOnMessage` function in `functions/` sends an alert to everyone except the sender.
+- **Email alerts:** `emailOnMessage` sends through Brevo. It switches on once the `BREVO_KEY` secret exists and `functions/.env` has `EMAIL_ALERTS=on`. Recipients live in Firestore at `settings/notify`.
+
 ## Notes for Pakistan connections
 
 - Fonts are self-hosted, so nothing waits on Google Fonts.

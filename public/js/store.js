@@ -75,6 +75,7 @@ export async function watchBoard(cb) {
       const d = snap.data();
       const board = JSON.parse(d.json);
       board._updatedAt = d.updatedAt?.toDate?.().toISOString?.() || null;
+      board._by = d.by || "";
       await resolveFiles(board);
       cacheBoard(board);
       cb(board, {});

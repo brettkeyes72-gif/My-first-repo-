@@ -54,7 +54,12 @@ const ICON = {
   alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>'
 };
-const icon = (k, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+// Built-in line icons until the TRUCK icon set is ready. To switch, put one SVG per name
+// above (home.svg, production.svg, …) in public/img/icons/ and set CONFIG.iconSet to
+// "img/icons/". Each file is drawn in the surrounding text colour.
+const icon = (k, cls = "") => CONFIG.iconSet
+  ? `<span class="ic ext ${cls}" style="--icon:url('${CONFIG.iconSet}${k}.svg')" aria-hidden="true"></span>`
+  : `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
 /* ---------- glove pictures ---------- */
 const MODEL_KEYS = [
@@ -207,13 +212,13 @@ function newChip(topic) {
   return n ? `<span class="chip newmsg">${icon("messages")} ${esc(t("newCount", { n }))}</span>` : "";
 }
 function updateBadge() {
-  const tab = document.querySelector(".tabs .tab.messages");
-  if (!tab) return;
   const n = newMessages().length;
-  let b = tab.querySelector(".tbadge");
-  if (!n) { if (b) b.remove(); return; }
-  if (!b) { b = document.createElement("em"); b.className = "tbadge"; tab.appendChild(b); }
-  b.textContent = n > 99 ? "99+" : n;
+  document.querySelectorAll('[data-tab="messages"]').forEach(tab => {
+    let b = tab.querySelector(".tbadge");
+    if (!n) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement("em"); b.className = "tbadge"; tab.appendChild(b); }
+    b.textContent = n > 99 ? "99+" : n;
+  });
 }
 function msgSnippet(m) {
   return m.text || t(m.kind === "video" ? "videoNote" : m.kind === "audio" ? "voiceNote" : "message");
@@ -284,6 +289,7 @@ function fileButton(d, opts = {}) {
 /* ============================================================
    page frame
    ============================================================ */
+const TABS = ["home", "production", "custom", "samples", "messages", "files"];
 function renderFrame() {
   document.getElementById("app").innerHTML = `
     <header class="top">
@@ -292,6 +298,9 @@ function renderFrame() {
           <img class="logo" src="img/truck-logo.png" alt="TRUCK">
           <span class="brandtxt"><b>${esc(t("siteName"))}</b><i>${esc(t("siteSub"))}</i></span>
         </a>
+        <nav class="topnav" aria-label="Main">
+          ${TABS.map(k => `<a href="#/${k === "home" ? "" : k}" data-tab="${k}" class="tn ${k}">${esc(t(k))}</a>`).join("")}
+        </nav>
         <button class="langbtn" id="langbtn" type="button">
           <b>${esc(t("langButton"))}</b><i>${esc(t("langButtonSub"))}</i>
         </button>
@@ -300,7 +309,7 @@ function renderFrame() {
     <div id="banner"></div>
     <main id="main" class="wrap"></main>
     <nav class="tabs" aria-label="Main">
-      ${["home", "production", "custom", "samples", "messages", "files"].map(k =>
+      ${TABS.map(k =>
         `<a href="#/${k === "home" ? "" : k}" data-tab="${k}" class="tab ${k}">${icon(k)}<span>${esc(t(k))}</span></a>`).join("")}
     </nav>`;
   document.getElementById("langbtn").onclick = () => {
@@ -320,7 +329,7 @@ function setBanner() {
 }
 
 function markTab(k) {
-  document.querySelectorAll(".tabs .tab").forEach(a => a.classList.toggle("on", a.dataset.tab === k));
+  document.querySelectorAll("[data-tab]").forEach(a => a.classList.toggle("on", a.dataset.tab === k));
 }
 
 function pageHead(bucket, title, sub, backHref) {
@@ -355,6 +364,9 @@ function route() {
   drawThreads();
   updateBadge();
   drawAlerts();
+  const mid = q.get("msg");
+  const target = mid && [...document.querySelectorAll("[data-mid]")].find(el => el.dataset.mid === mid);
+  if (target) { target.scrollIntoView({ block: "center" }); target.classList.add("flash"); }
 }
 
 function drawPage(a, b, q) {
@@ -407,10 +419,7 @@ function renderHome() {
     </a>`;
 
   main().innerHTML = `
-    <section class="hello">
-      <h1>${esc(who ? t("hello", { name: who.name }) : t("helloAnon"))}</h1>
-      <p>${esc(t("pickArea"))}</p>
-    </section>
+    ${msgHero()}
 
     <div data-alerts="home"></div>
 
@@ -430,21 +439,11 @@ function renderHome() {
         </a>`).join("")}</div>
     </section>` : ""}
 
-    ${(() => { const fresh = newMessages(); return fresh.length ? `<section class="newmsgs">
-      <h2>${icon("messages")} ${esc(t("newMessages"))} <span class="count">${fresh.length}</span></h2>
-      <div class="nmlist">${fresh.slice(0, 6).map(m => `
-        <a class="nmcard ${topicBucket(m.topic)}" href="${topicHref(m.topic) || `#/messages?topic=${encodeURIComponent(m.topic || "general")}`}">
-          <span class="avatar ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
-          <span><b>${esc(m.name)} · ${esc(topicLabel(m.topic))}</b><i dir="auto">${esc(msgSnippet(m))}</i></span>
-        </a>`).join("")}</div>
-      ${fresh.length > 6 ? `<p><a class="linkbtn" href="#/messages">${esc(t("seeAll", { n: fresh.length }))}</a></p>` : ""}
-    </section>` : ""; })()}
-
     <section class="tilegrid">
       ${tile("production", pos.length, "orders", nextDate(pos.map(poShip)))}
       ${tile("custom", cusActive.length, "projects", nextDate(cusActive.map(c => c.current)))}
       ${tile("samples", smp.length, "requests", nextDate(smp.map(s => s.current)))}
-      ${tile("messages", recent || null, "messages")}
+      ${tile("messages", recent || null, "messagesUnit")}
       ${tile("files", null)}
       ${store.LIVE && store.isAdmin(user) ? `<a class="bigtile admin" href="#/admin"><span class="bt-ico">${icon("admin")}</span><span class="bt-name">${esc(t("admin"))}</span><span class="bt-sub">${esc(t("adminSub"))}</span></a>` : ""}
     </section>
@@ -456,6 +455,75 @@ function renderHome() {
   const so = document.getElementById("signout");
   if (so) so.onclick = () => store.signOut();
 }
+
+/* ---------- the TRUCK / SSC message panel at the top of home ---------- */
+let lastSync = 0; // when this page last heard from the server
+
+function ago(ms) {
+  const min = Math.round((Date.now() - ms) / 60000);
+  if (min < 1) return t("justNow");
+  if (min < 60) return t("minAgo", { n: min });
+  if (min < 48 * 60) return t("hAgo", { n: Math.round(min / 60) });
+  return t("dAgo", { n: Math.round(min / 1440) });
+}
+const when = ms => new Date(ms).toLocaleString([], { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+const agoEl = ms => `<time data-ago="${ms}" title="${esc(when(ms))}">${esc(ago(ms))}</time>`;
+
+function msgLink(m) {
+  const th = topicHref(m.topic);
+  return th ? `${th}?msg=${encodeURIComponent(m.id)}` : `#/messages?topic=${encodeURIComponent(m.topic || "general")}&msg=${encodeURIComponent(m.id)}`;
+}
+
+// "Live · last update 5 min ago (28 Oct, 3:14 PM)"
+function liveBar() {
+  const boardAt = board?._updatedAt ? Date.parse(board._updatedAt) : 0;
+  const last = Math.max(boardAt, messages[0]?.at || 0);
+  return `<p class="livebar ${boardOffline ? "off" : ""}" data-livebar>
+    <span class="dot"></span><b>${esc(t(boardOffline ? "offlineShort" : "liveShort"))}</b>
+    ${last ? `<span>${esc(t("lastUpdate"))} ${agoEl(last)} <i>(${esc(when(last))})</i></span>` : ""}
+    ${boardAt ? `<span>${esc(t("boardData"))}: ${esc(when(boardAt))}${board._by ? ` · ${esc(board._by)}` : ""}</span>` : ""}
+    ${lastSync ? `<span>${esc(t("checked"))} ${esc(new Date(lastSync).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }))}</span>` : ""}
+  </p>`;
+}
+
+function msgHero() {
+  // newest message per conversation (messages are newest first)
+  const latest = new Map();
+  for (const m of messages) if (!latest.has(m.topic || "general")) latest.set(m.topic || "general", m);
+  const side = org => {
+    const other = org === "SSC" ? "TRUCK" : "SSC";
+    const fresh = messages.filter(m => m.org === org && isNew(m));
+    // waiting = the conversation's last word came from this side, so the other side owes a reply
+    const waiting = [...latest.values()].filter(m => m.org === org);
+    const rows = [...new Map([...fresh, ...waiting].map(m => [m.id, m])).values()].slice(0, 3);
+    const top = fresh[0] || waiting[0] || messages.find(m => m.org === org);
+    const all = `#/messages?from=${org}`;
+    return `<div class="mhside ${org === "SSC" ? "ssc" : "truck"}">
+      <a class="mh-main" href="${top ? msgLink(top) : all}">
+        <span class="mh-org">${esc(t("fromOrg", { org }))}</span>
+        <span class="mh-n"><b>${fresh.length}</b> ${esc(t("newWord"))}</span>
+        <span class="mh-w">${waiting.length ? esc(t("waitingFor", { n: waiting.length, who: other })) : esc(t("nothingWaiting"))}</span>
+      </a>
+      ${rows.length ? `<ul class="mh-rows">${rows.map(m => `<li><a href="${msgLink(m)}">
+        <span class="avatar sm ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
+        <span class="mh-row"><b>${esc(topicLabel(m.topic))}</b><i dir="auto">${esc(m.name)}: ${esc(msgSnippet(m))}</i></span>
+        <span class="mh-meta">${isNew(m) ? `<span class="newtag">${esc(t("newTag"))}</span>` : ""}${agoEl(m.at)}</span>
+      </a></li>`).join("")}</ul>` : `<p class="mh-none">${esc(t("noMessagesFrom", { org }))}</p>`}
+      <a class="mh-all" href="${all}">${esc(t("allFrom", { org }))} →</a>
+    </div>`;
+  };
+  return `<section class="msghero">
+    <div class="mh-head"><h2>${icon("messages")} ${esc(t("messages"))}</h2>${liveBar()}</div>
+    <div class="mh-sides">${side("TRUCK")}${side("SSC")}</div>
+  </section>`;
+}
+
+// keep "5 min ago" and the live line current without redrawing the page
+setInterval(() => {
+  document.querySelectorAll("time[data-ago]").forEach(el => { el.textContent = ago(+el.dataset.ago); });
+  const lb = document.querySelector("[data-livebar]");
+  if (lb && board) lb.outerHTML = liveBar();
+}, 30000);
 
 function renderUpdates() {
   const log = (board.changelog || []).slice(0, 3);
@@ -825,13 +893,14 @@ function topicBucket(topic) {
 
 function renderMessages(topic) {
   const who = me();
+  const from = parseHash().q.get("from");
   if (!who) return renderWho(() => renderMessages(topic));
   const topics = ["", "general", "production", "custom", "samples"];
   if (topic && !topics.includes(topic)) topics.push(topic);
 
   main().innerHTML = `
     ${pageHead("messages", t("messages"), t("messagesSub"))}
-    <div class="topics">${topics.map(tp => `<a class="tchip ${topicBucket(tp)} ${tp === topic ? "on" : ""}" href="#/messages${tp ? "?topic=" + encodeURIComponent(tp) : ""}">${esc(tp ? topicLabel(tp) : t("allTopics"))}</a>`).join("")}</div>
+    <div class="topics">${topics.map(tp => `<a class="tchip ${topicBucket(tp)} ${tp === topic && !from ? "on" : ""}" href="#/messages${tp ? "?topic=" + encodeURIComponent(tp) : ""}">${esc(tp ? topicLabel(tp) : t("allTopics"))}</a>`).join("")}${["TRUCK", "SSC"].map(o => `<a class="tchip messages ${from === o ? "on" : ""}" href="#/messages?from=${o}">${esc(t("fromOrg", { org: o }))}</a>`).join("")}</div>
 
     <section class="composer card">
       <div class="whoami"><span class="avatar ${who.org === "SSC" ? "ssc" : "truck"}">${esc(who.name[0] || "?")}</span>
@@ -861,7 +930,8 @@ function renderMessages(topic) {
 function drawFeed(topic) {
   const el = document.getElementById("feed");
   if (!el) return;
-  const list = messages.filter(m => !topic || m.topic === topic || (["production", "custom", "samples"].includes(topic) && topicBucket(m.topic) === topic));
+  const from = parseHash().q.get("from");
+  const list = messages.filter(m => (!from || m.org === from) && (!topic || m.topic === topic || (["production", "custom", "samples"].includes(topic) && topicBucket(m.topic) === topic)));
   if (!list.length) { el.innerHTML = `<p class="empty big">${esc(t("noMessages"))}</p>`; return; }
   el.innerHTML = list.map(m => msgHtml(m)).join("");
   markSeen([...new Set(list.map(m => m.topic || "general")), ...(topic ? [] : ["*"])]);
@@ -872,7 +942,7 @@ function msgHtml(m, inThread) {
   const th = topicHref(m.topic);
   const body = m.kind === "video" && src ? `<video src="${esc(src)}" controls playsinline preload="metadata"></video>`
     : m.kind === "audio" && src ? `<audio src="${esc(src)}" controls preload="metadata"></audio>` : "";
-  return `<article class="msg ${m.name === me()?.name ? "mine" : ""} ${isNew(m, SEEN_AT_START) ? "new" : ""}">
+  return `<article class="msg ${m.name === me()?.name ? "mine" : ""} ${isNew(m, SEEN_AT_START) ? "new" : ""}" data-mid="${esc(m.id)}">
     <span class="avatar ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
     <div class="bubble">
       <header><b>${esc(m.name)}</b> <i>${esc(m.org || "")}</i> <time>${esc(new Date(m.at).toLocaleString())}</time>${isNew(m, SEEN_AT_START) ? ` <span class="newtag">${esc(t("newTag"))}</span>` : ""}</header>
@@ -1078,9 +1148,10 @@ store.watchUser(u => {
   route();
   if (store.LIVE && !u) return;
   if (store.LIVE && store.PUSH_OK) store.pushStatus().then(st => { pushState = st; drawAlerts(); }).catch(() => {});
-  store.watchBoard((b, info) => { board = b; boardOffline = !!info.offline; refresh(); });
+  store.watchBoard((b, info) => { lastSync = Date.now(); board = b; boardOffline = !!info.offline; refresh(); });
   store.watchMessages(list => {
     messages = list;
+    lastSync = Date.now();
     const page = parseHash().parts[0];
     if (page === "messages") drawFeed(parseHash().q.get("topic") || "");
     else if (!busy && ![...document.querySelectorAll("video, audio")].some(v => !v.paused)) {
