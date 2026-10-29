@@ -583,3 +583,37 @@ button.text-link {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   z-index: 10;
 }
+
+/* ---------- Shop links on the result ---------- */
+
+.shop {
+  margin: 28px -16px 0;
+  padding: 24px 20px;
+  background: var(--head);
+  text-align: center;
+}
+.shop-title {
+  margin: 0 0 14px;
+  font: 700 1.35rem/1.2 "Oswald", sans-serif;
+  text-transform: uppercase;
+  color: #fff;
+}
+.shop .shop-all {
+  width: 100%;
+  background: var(--lime);
+  border-color: var(--lime);
+  color: var(--head);
+  text-decoration: none;
+}
+.shop-links { display: flex; gap: 8px; margin-top: 10px; }
+.shop-links a {
+  flex: 1;
+  padding: 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  color: #fff;
+  font: 500 0.85rem/1 "Poppins", sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
