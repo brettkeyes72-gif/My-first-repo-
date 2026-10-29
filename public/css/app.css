@@ -285,11 +285,15 @@ html[dir="rtl"] .bt-name { font-family: "Noto Nastaliq Urdu", var(--head); text-
 .backbtn .ic { width: 20px; height: 20px; }
 html[dir="rtl"] .backbtn { font-family: "Noto Nastaliq Urdu", var(--font); letter-spacing: 0; font-size: 15px; }
 html[dir="rtl"] .backbtn .ic { transform: scaleX(-1); }
-.ph-title { display: flex; align-items: center; gap: 16px; background: var(--c); color: var(--co); border-radius: var(--radius); padding: 20px 24px; min-width: 0; }
+/* a section title, not a tile: big heading with a short category-colour rule under it */
+.ph-title { position: relative; display: flex; align-items: center; gap: 14px; padding: 2px 0 16px; border-bottom: 1px solid var(--line); min-width: 0; }
+.ph-title::after { content: ""; position: absolute; inset-inline-start: 0; bottom: -1px; width: 72px; height: 3px; background: var(--c); }
 .ph-title > div { min-width: 0; }
-.ph-title .ic.big { width: 44px; height: 44px; }
-.ph-title h1 { font-size: clamp(26px, 4.2vw, 40px); letter-spacing: .02em; overflow-wrap: anywhere; }
-.ph-title p { margin: 2px 0 0; opacity: .9; font-size: 15px; }
+.ph-ico { width: 46px; height: 46px; border-radius: 8px; background: var(--cs); color: var(--ci); display: grid; place-items: center; flex: 0 0 auto; }
+.ph-ico .ic { width: 26px; height: 26px; }
+.ph-title h1 { font-size: clamp(28px, 4.4vw, 44px); letter-spacing: .02em; color: var(--ink); overflow-wrap: anywhere; }
+.ph-title p { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
+@media (max-width: 560px) { .ph-ico { width: 38px; height: 38px; } .ph-ico .ic { width: 22px; height: 22px; } }
 .boardnote { background: var(--ground-2); border-inline-start: 4px solid var(--sand); border-radius: 8px; padding: 16px 20px; margin: 0 0 24px; color: var(--ink); }
 
 /* ---------- order cards (lists) ---------- */
@@ -482,8 +486,9 @@ html[dir="rtl"] .sz { line-height: 1.6; }
 .filegroup h2 .ic { color: var(--c, var(--sand)); width: 28px; height: 28px; }
 
 /* ---------- messages ---------- */
-.topics { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 16px; scrollbar-width: none; }
-.tchip { flex: 0 0 auto; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); text-decoration: none; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.topics { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 6px; margin-bottom: 16px; }
+.tchip.clear { order: -1; }
+.tchip { flex: 0 0 auto; padding: 9px 16px; min-height: 44px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); text-decoration: none; font-weight: 600; font-size: 14px; color: var(--ink-2); }
 .tchip:hover { border-color: var(--ink); color: var(--ink); }
 .tchip.on { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 .whoami { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; margin-bottom: 20px; }

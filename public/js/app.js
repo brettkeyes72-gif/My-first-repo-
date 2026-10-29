@@ -348,8 +348,8 @@ function markTab(k) {
 
 function pageHead(bucket, title, sub, backHref) {
   return `<div class="pagehead ${bucket}">
-    <a class="backbtn" href="${backHref || "#/"}">${icon("back")}<span>${esc(t("back"))}</span></a>
-    <div class="ph-title">${icon(bucket, "big")}<div><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div></div>
+    ${backHref ? `<a class="backbtn" href="${backHref}">${icon("back")}<span>${esc(t("back"))}</span></a>` : ""}
+    <div class="ph-title"><span class="ph-ico">${icon(bucket)}</span><div><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div></div>
   </div>`;
 }
 
@@ -909,17 +909,19 @@ function renderMessages(topic) {
   const who = me();
   const from = parseHash().q.get("from");
   if (!who) return renderWho(() => renderMessages(topic));
-  const topics = ["", "general", "production", "custom", "samples"];
-  if (topic && !topics.includes(topic)) topics.push(topic);
+  const topics = ["", "production", "custom", "samples", "other"];
+  const one = topic && !topics.includes(topic) ? topic : ""; // a single conversation, e.g. one PO
+  const postTo = !topic || topic === "other" ? "general" : topic;
 
   main().innerHTML = `
     ${pageHead("messages", t("messages"), t("messagesSub"))}
-    <div class="topics">${topics.map(tp => `<a class="tchip ${topicBucket(tp)} ${tp === topic && !from ? "on" : ""}" href="#/messages${tp ? "?topic=" + encodeURIComponent(tp) : ""}">${esc(tp ? topicLabel(tp) : t("allTopics"))}</a>`).join("")}${["TRUCK", "SSC"].map(o => `<a class="tchip messages ${from === o ? "on" : ""}" href="#/messages?from=${o}">${esc(t("fromOrg", { org: o }))}</a>`).join("")}</div>
+    <div class="topics">${topics.map(tp => `<a class="tchip ${tp === topic && !from ? "on" : ""}" href="#/messages${tp ? "?topic=" + tp : ""}">${esc(t(tp ? (tp === "other" ? "otherTopic" : tp) : "allTopics"))}</a>`).join("")}${
+      one || from ? `<a class="tchip on clear" href="#/messages" aria-label="${esc(t("allTopics"))}">${esc(one ? topicLabel(one) : t("fromOrg", { org: from }))} ✕</a>` : ""}</div>
 
     <section class="composer card">
       <div class="whoami"><span class="avatar ${who.org === "SSC" ? "ssc" : "truck"}">${esc(who.name[0] || "?")}</span>
         <b>${esc(who.name)}</b> <i>${esc(who.org || "")}</i>
-        <button class="linkbtn" id="changeme" type="button">${esc(t("change"))}</button>
+        ${CONFIG.people.filter(p => !myOrg() || p.org === myOrg()).length > 1 ? `<button class="linkbtn" id="changeme" type="button">${esc(t("change"))}</button>` : ""}
         ${topic ? `<span class="chip ${topicBucket(topic)}">${esc(t("topic"))}: ${esc(topicLabel(topic))}</span>` : ""}
       </div>
       <div class="modes">
@@ -936,8 +938,9 @@ function renderMessages(topic) {
 
     <a class="bigbtn gray callbtn" href="https://meet.jit.si/TRUCK-SSC-${encodeURIComponent((topic || "general").replace(/[^a-z0-9]/gi, "-"))}" target="_blank" rel="noopener">${icon("call")}<span><b>${esc(t("liveVideoCall"))}</b><i>${esc(t("liveVideoCallSub"))}</i></span></a>
   `;
-  document.getElementById("changeme").onclick = () => renderWho(() => renderMessages(topic), true);
-  main().querySelectorAll("[data-mode]").forEach(b => b.onclick = () => openPanel(b.dataset.mode, topic));
+  const ch = document.getElementById("changeme");
+  if (ch) ch.onclick = () => renderWho(() => renderMessages(topic), true);
+  main().querySelectorAll("[data-mode]").forEach(b => b.onclick = () => openPanel(b.dataset.mode, postTo));
   drawFeed(topic);
 }
 
@@ -945,7 +948,9 @@ function drawFeed(topic) {
   const el = document.getElementById("feed");
   if (!el) return;
   const from = parseHash().q.get("from");
-  const list = messages.filter(m => (!from || m.org === from) && (!topic || m.topic === topic || (["production", "custom", "samples"].includes(topic) && topicBucket(m.topic) === topic)));
+  const list = messages.filter(m => (!from || m.org === from) && (!topic || m.topic === topic
+    || (["production", "custom", "samples"].includes(topic) && topicBucket(m.topic) === topic)
+    || (topic === "other" && topicBucket(m.topic) === "messages")));
   if (!list.length) { el.innerHTML = `<p class="empty big">${esc(t("noMessages"))}</p>`; return; }
   el.innerHTML = list.map(m => msgHtml(m)).join("");
   markSeen([...new Set(list.map(m => m.topic || "general")), ...(topic ? [] : ["*"])]);
