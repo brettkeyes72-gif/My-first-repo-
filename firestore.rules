@@ -18,7 +18,9 @@ service cloud.firestore {
     }
     match /messages/{id} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      // a message is filed under the side of the login that sent it
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.org == (admin() ? 'TRUCK' : 'SSC');
       allow delete: if admin() || (signedIn() && resource.data.uid == request.auth.uid);
     }
   }

@@ -28,8 +28,20 @@ function daysUntil(iso) {
   return Math.round((b - a) / 86400000);
 }
 
+// Which side this login is on: admin emails are TRUCK, every other login is SSC.
+function myOrg() {
+  return store.LIVE && user && user.email ? (store.isAdmin(user) ? "TRUCK" : "SSC") : null;
+}
+// The name saved on this device, but only if it belongs to the signed-in side,
+// so a phone signed in as TRUCK can never post as an SSC person or the other way round.
 function me() {
-  try { return JSON.parse(localStorage.getItem("ssc-truck-me")); } catch (e) { return null; }
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem("ssc-truck-me")); } catch (e) {}
+  const org = myOrg();
+  if (!org) return v;
+  if (v && v.org === org) return v;
+  const mine = CONFIG.people.filter(p => p.org === org);
+  return mine.length === 1 ? mine[0] : null; // one person on this side: no need to ask
 }
 function setMe(v) {
   try { localStorage.setItem("ssc-truck-me", JSON.stringify(v)); } catch (e) {}
@@ -1044,18 +1056,20 @@ function openPanel(mode, topic) {
 function renderWho(next, force) {
   const cur = me();
   if (cur && !force) return next();
+  const org = myOrg();
+  const people = CONFIG.people.filter(p => !org || p.org === org);
   main().innerHTML = `
     ${pageHead("messages", t("whoAreYou"), t("whoSub"))}
     <div class="whogrid">
-      ${CONFIG.people.map((p, i) => `<button class="whobtn ${p.org === "SSC" ? "ssc" : "truck"}" data-i="${i}" type="button"><span class="avatar">${esc(p.name[0])}</span><b>${esc(p.name)}</b><i>${esc(p.org)}</i></button>`).join("")}
+      ${people.map((p, i) => `<button class="whobtn ${p.org === "SSC" ? "ssc" : "truck"}" data-i="${i}" type="button"><span class="avatar">${esc(p.name[0])}</span><b>${esc(p.name)}</b><i>${esc(p.org)}</i></button>`).join("")}
     </div>
     <section class="card whoother">
       <label for="othername">${esc(t("otherName"))}</label>
       <div class="row"><input id="othername" type="text" dir="auto" autocomplete="name">
-      <select id="otherorg"><option>SSC</option><option>TRUCK</option></select>
+      ${org ? `<input id="otherorg" type="hidden" value="${org}">` : `<select id="otherorg"><option>SSC</option><option>TRUCK</option></select>`}
       <button class="bigbtn green" id="saveother" type="button"><span><b>${esc(t("save"))}</b></span></button></div>
     </section>`;
-  main().querySelectorAll(".whobtn").forEach(b => b.onclick = () => { setMe(CONFIG.people[+b.dataset.i]); next(); });
+  main().querySelectorAll(".whobtn").forEach(b => b.onclick = () => { setMe(people[+b.dataset.i]); next(); });
   document.getElementById("saveother").onclick = () => {
     const name = document.getElementById("othername").value.trim();
     if (!name) return;
