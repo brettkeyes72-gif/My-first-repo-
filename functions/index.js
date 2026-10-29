@@ -22,7 +22,8 @@ const webpush = require("web-push");
 
 admin.initializeApp();
 const VAPID_PRIVATE = defineSecret("VAPID_PRIVATE");
-const BREVO_KEY = defineSecret("BREVO_KEY");
+// Declared only when email is on, so the deploy doesn't ask for a key that doesn't exist yet.
+const BREVO_KEY = process.env.EMAIL_ALERTS === "on" ? defineSecret("BREVO_KEY") : null;
 const VAPID_PUBLIC = "BEzIBFHdwvhMDP5sX-bcLeCD1VX951xF6Pz9eekYf_SehSScoCcRgB9flbbscSw-tq9r7QUAyZj1e7aVz4nVkFg";
 const SITE = "https://truck-ssc-portal.web.app/";
 
