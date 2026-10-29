@@ -473,3 +473,23 @@ html[dir="rtl"] .arrived h2 { text-transform: none; }
 .shiprow ul { margin: 0; padding-inline-start: 20px; font-size: 15px; color: var(--ink-2); }
 .glove.ph.artph { display: grid; place-items: center; text-align: center; padding: 16px; font-family: var(--head); font-size: 18px; letter-spacing: .04em; color: var(--ink-3); border: 3px dashed var(--line); border-radius: 14px; }
 .oc-pics.art .glove { object-fit: contain; }
+
+/* ---------- conversations on each page, and new-message flags ---------- */
+.thread h2 { display: flex; align-items: center; gap: 10px; }
+.thread h2 .count, .newmsgs h2 .count { background: var(--sand); color: #171717; border-radius: 999px; padding: 0 12px; font-size: 18px; }
+.thread .feed { margin: 18px 0; }
+.thread .talk { margin-top: 12px; }
+.msg.new .bubble { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+.newtag { background: var(--red); color: #fff; border-radius: 999px; padding: 1px 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.chip.newmsg { background: var(--red); color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+.chip.newmsg .ic { width: 16px; height: 16px; }
+.tab.messages { position: relative; }
+.tbadge { position: absolute; top: 6px; inset-inline-start: calc(50% + 6px); min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px; background: var(--red); color: #fff; font-style: normal; font-size: 13px; font-weight: 700; line-height: 24px; text-align: center; }
+.newmsgs { background: var(--sand-soft); border: 3px solid var(--sand); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 28px; }
+.newmsgs h2 { font-size: 24px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+.nmlist { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 16px; }
+.nmcard { display: flex; gap: 14px; align-items: center; background: var(--surface); border-radius: 18px; padding: 12px 16px; text-decoration: none; color: var(--ink); border: 3px solid var(--c, var(--line)); }
+.nmcard > span:last-child { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.nmcard .avatar { flex: 0 0 auto; }
+.nmcard b { display: block; font-family: var(--head); font-size: 18px; }
+.nmcard i { display: block; font-style: normal; font-size: 15px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

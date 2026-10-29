@@ -182,6 +182,61 @@ function talkButton(topic) {
   return `<a class="bigbtn purple talk" href="#/messages?topic=${encodeURIComponent(topic)}">${icon("messages")}<span><b>${esc(t("talk"))}</b><i>${esc(t("talkSub"))}</i></span></a>`;
 }
 
+/* ---------- each order's own conversation, and what is new ---------- */
+// "Seen" is kept per device: when this device last opened each conversation.
+const SEEN = "ssc-truck-seen";
+function seenMap() { try { return JSON.parse(localStorage.getItem(SEEN)) || {}; } catch (e) { return {}; } }
+function markSeen(topics) {
+  const s = seenMap(), now = Date.now();
+  for (const tp of topics) s[tp] = now;
+  try { localStorage.setItem(SEEN, JSON.stringify(s)); } catch (e) {}
+  updateBadge();
+}
+// New = sent by someone else, after this device last looked at that conversation.
+// The "New" tag on a message keeps what was seen when the site opened, so it doesn't vanish on redraw.
+const SEEN_AT_START = seenMap();
+function isNew(m, s = seenMap()) {
+  const who = me();
+  if (who && m.name === who.name && m.org === who.org) return false;
+  return m.at > Math.max(s["*"] || 0, s[m.topic || "general"] || 0);
+}
+function newMessages(topic) { return messages.filter(m => isNew(m) && (!topic || m.topic === topic)); }
+function newChip(topic) {
+  const n = newMessages(topic).length;
+  return n ? `<span class="chip newmsg">${icon("messages")} ${esc(t("newCount", { n }))}</span>` : "";
+}
+function updateBadge() {
+  const tab = document.querySelector(".tabs .tab.messages");
+  if (!tab) return;
+  const n = newMessages().length;
+  let b = tab.querySelector(".tbadge");
+  if (!n) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement("em"); b.className = "tbadge"; tab.appendChild(b); }
+  b.textContent = n > 99 ? "99+" : n;
+}
+function msgSnippet(m) {
+  return m.text || t(m.kind === "video" ? "videoNote" : m.kind === "audio" ? "voiceNote" : "message");
+}
+
+function talkSection(topic) {
+  return `<section class="card thread" data-thread="${esc(topic)}">${threadHtml(topic)}</section>`;
+}
+function threadHtml(topic) {
+  const list = messages.filter(m => m.topic === topic);
+  const shown = list.slice(0, 5);
+  const all = `#/messages?topic=${encodeURIComponent(topic)}`;
+  return `<h2>${icon("messages")} ${esc(t("conversation"))}${list.length ? ` <span class="count">${list.length}</span>` : ""}</h2>
+    ${shown.length ? `<div class="feed">${shown.map(m => msgHtml(m, true)).join("")}</div>` : `<p class="hint">${esc(t("noMessagesHere"))}</p>`}
+    ${list.length > shown.length ? `<p><a class="linkbtn" href="${all}">${esc(t("seeAll", { n: list.length }))}</a></p>` : ""}
+    ${talkButton(topic)}`;
+}
+// Draw the conversations on the page and count them as read.
+function drawThreads() {
+  const els = [...document.querySelectorAll("[data-thread]")];
+  els.forEach(el => { el.innerHTML = threadHtml(el.dataset.thread); });
+  if (els.length) markSeen(els.map(el => el.dataset.thread));
+}
+
 function fileButton(d, opts = {}) {
   const u = store.href(d);
   if (!u) return `<span class="filebtn missing">${icon("doc")}<span><b>${esc(d.label || t("noPoFile"))}</b>${d.note ? `<i>${esc(d.note)}</i>` : ""}</span></span>`;
@@ -259,6 +314,12 @@ function route() {
   if (!board && a !== "messages") { main().innerHTML = `<div class="loading">${esc(t("loading"))}</div>`; return; }
 
   window.scrollTo({ top: 0 });
+  drawPage(a, b, q);
+  drawThreads();
+  updateBadge();
+}
+
+function drawPage(a, b, q) {
   switch (a) {
     case undefined: markTab("home"); return renderHome();
     case "production": markTab("production"); return b ? renderPO(b) : renderProduction();
@@ -329,6 +390,16 @@ function renderHome() {
         </a>`).join("")}</div>
     </section>` : ""}
 
+    ${(() => { const fresh = newMessages(); return fresh.length ? `<section class="newmsgs">
+      <h2>${icon("messages")} ${esc(t("newMessages"))} <span class="count">${fresh.length}</span></h2>
+      <div class="nmlist">${fresh.slice(0, 6).map(m => `
+        <a class="nmcard ${topicBucket(m.topic)}" href="${topicHref(m.topic) || `#/messages?topic=${encodeURIComponent(m.topic || "general")}`}">
+          <span class="avatar ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
+          <span><b>${esc(m.name)} · ${esc(topicLabel(m.topic))}</b><i dir="auto">${esc(msgSnippet(m))}</i></span>
+        </a>`).join("")}</div>
+      ${fresh.length > 6 ? `<p><a class="linkbtn" href="#/messages">${esc(t("seeAll", { n: fresh.length }))}</a></p>` : ""}
+    </section>` : ""; })()}
+
     <section class="tilegrid">
       ${tile("production", pos.length, "orders", nextDate(pos.map(poShip)))}
       ${tile("custom", cusActive.length, "projects", nextDate(cusActive.map(c => c.current)))}
@@ -371,7 +442,7 @@ function renderProduction() {
         return `<a class="ordercard production ${p.needsOK && !st.done ? "alert" : ""} ${st.done ? "done" : ""}" href="#/production/${esc(p.id)}">
           <div class="oc-pics n${Math.max(pics.length, 1)}">${pics.length ? pics.map(l => gloveImg(l.model, l.color)).join("") : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
           <div class="oc-body">
-            <div class="oc-top">${chip(st)}</div>
+            <div class="oc-top">${chip(st)}${newChip("po:" + p.id)}</div>
             <h2 dir="ltr">${esc(p.po)}</h2>
             <p class="oc-label">${esc(pick(p, "label").text)}</p>
             ${pairs ? `<p class="oc-pairs"><b>${fmtNum(pairs)}</b> ${esc(t("pairs"))}</p>` : ""}
@@ -435,8 +506,9 @@ function renderPO(id) {
 
     <section class="filesrow">
       ${p.doc ? fileButton({ ...p.doc, label: p.doc.url ? `${t("downloadPo")} · ${p.po}` : p.doc.label }, { primary: true }) : ""}
-      ${talkButton("po:" + p.id)}
     </section>
+
+    ${talkSection("po:" + p.id)}
 
     <h2 class="sech">${esc(t("gloves"))}</h2>
     <div class="glovegrid">
@@ -493,7 +565,7 @@ function customCard(c) {
   return `<a class="ordercard custom ${st.k === "needsOkShort" ? "alert" : ""} ${st.done ? "done" : ""}" href="#/custom/${esc(c.id)}">
     <div class="oc-pics n1 ${hero ? "art" : ""}">${hero ? `<img class="glove" src="${esc(hero)}" alt="" loading="lazy">` : gloveImg(customGlove(c), customGlove(c))}</div>
     <div class="oc-body">
-      <div class="oc-top">${chip(st)}${c.replacement ? `<span class="chip gray">RPL</span>` : ""}</div>
+      <div class="oc-top">${chip(st)}${c.replacement ? `<span class="chip gray">RPL</span>` : ""}${newChip("custom:" + c.id)}</div>
       <h2>${esc(c.name)}</h2>
       <p class="oc-label" dir="auto">${esc(c.po || c.account || "")}</p>
       ${pairs ? `<p class="oc-pairs"><b>${fmtNum(pairs)}</b> ${esc(t("pairs"))} · <span dir="ltr">${esc(customGlove(c).split(/[—,(]/)[0].trim())}</span></p>` : ""}
@@ -579,6 +651,8 @@ function renderCustomOne(id) {
 
     ${st.k === "needsOkShort" ? `<section class="todo red">${icon("alert", "big")}<div><h2>${esc(t("whatToDo"))}</h2>${textBlock(c, "note")}</div></section>` : ""}
 
+    ${talkSection("custom:" + c.id)}
+
     <section class="glovehero card">
       <div class="gh-pic">${gloveImg(glove, glove, "xl")}</div>
       <div class="gh-body">
@@ -592,7 +666,6 @@ function renderCustomOne(id) {
 
     <section class="filesrow">
       ${c.art?.url ? fileButton({ url: c.art.url, label: t("artFolder") }, { sub: c.art.folder }) : ""}
-      ${talkButton("custom:" + c.id)}
     </section>
 
     ${rest.length ? `<section class="card"><h2>${esc(t("items"))}</h2>
@@ -618,7 +691,7 @@ function renderSamples() {
       return `<a class="ordercard samples ${st.k === "needsOkShort" ? "alert" : ""}" href="#/samples/${esc(s.id)}">
         <div class="oc-pics n${Math.max(pics.length, 1)} ${hero ? "art" : ""}">${pics.length ? pics.map(src => `<img class="glove" src="${src}" alt="" loading="lazy">`).join("") : notGlove(s) ? `<div class="glove ph artph">${esc(t("artworkComing"))}</div>` : `<div class="glove ph">${GLOVE_SVG}</div>`}</div>
         <div class="oc-body">
-          <div class="oc-top">${chip(st)}</div>
+          <div class="oc-top">${chip(st)}${newChip("sample:" + s.id)}</div>
           <h2>${esc(s.name)}</h2>
           <p class="oc-label" dir="auto">${esc(pick(s, "detail").text)}</p>
         </div>
@@ -661,7 +734,7 @@ function renderSample(id) {
     ${spec.length ? `<section class="card"><h2>${esc(t("details"))}</h2>
       <dl class="kv">${spec.map(r => `<dt>${esc(r[0])}</dt><dd dir="auto">${esc(r[1])}</dd>`).join("")}</dl></section>` : ""}
     ${docGallery(s.docs || [])}
-    <section class="filesrow">${talkButton("sample:" + s.id)}</section>
+    ${talkSection("sample:" + s.id)}
     ${s.note ? `<section class="card notes"><h2>${esc(t("notes"))}</h2>${textBlock(s, "note")}</section>` : ""}
   `;
   wireGallery();
@@ -748,22 +821,24 @@ function drawFeed(topic) {
   if (!el) return;
   const list = messages.filter(m => !topic || m.topic === topic || (["production", "custom", "samples"].includes(topic) && topicBucket(m.topic) === topic));
   if (!list.length) { el.innerHTML = `<p class="empty big">${esc(t("noMessages"))}</p>`; return; }
-  const mine = me()?.name;
-  el.innerHTML = list.map(m => {
-    const src = m.url || (m.blob ? URL.createObjectURL(m.blob) : null);
-    const th = topicHref(m.topic);
-    const body = m.kind === "video" && src ? `<video src="${esc(src)}" controls playsinline preload="metadata"></video>`
-      : m.kind === "audio" && src ? `<audio src="${esc(src)}" controls preload="metadata"></audio>` : "";
-    return `<article class="msg ${m.name === mine ? "mine" : ""}">
-      <span class="avatar ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
-      <div class="bubble">
-        <header><b>${esc(m.name)}</b> <i>${esc(m.org || "")}</i> <time>${esc(new Date(m.at).toLocaleString())}</time></header>
-        ${m.topic && m.topic !== "general" ? `<a class="chip ${topicBucket(m.topic)}" ${th ? `href="${th}"` : ""}>${esc(topicLabel(m.topic))}</a>` : ""}
-        ${body}
-        ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ""}
-      </div>
-    </article>`;
-  }).join("");
+  el.innerHTML = list.map(m => msgHtml(m)).join("");
+  markSeen([...new Set(list.map(m => m.topic || "general")), ...(topic ? [] : ["*"])]);
+}
+
+function msgHtml(m, inThread) {
+  const src = m.url || (m.blob ? URL.createObjectURL(m.blob) : null);
+  const th = topicHref(m.topic);
+  const body = m.kind === "video" && src ? `<video src="${esc(src)}" controls playsinline preload="metadata"></video>`
+    : m.kind === "audio" && src ? `<audio src="${esc(src)}" controls preload="metadata"></audio>` : "";
+  return `<article class="msg ${m.name === me()?.name ? "mine" : ""} ${isNew(m, SEEN_AT_START) ? "new" : ""}">
+    <span class="avatar ${m.org === "SSC" ? "ssc" : "truck"}">${esc((m.name || "?")[0])}</span>
+    <div class="bubble">
+      <header><b>${esc(m.name)}</b> <i>${esc(m.org || "")}</i> <time>${esc(new Date(m.at).toLocaleString())}</time>${isNew(m, SEEN_AT_START) ? ` <span class="newtag">${esc(t("newTag"))}</span>` : ""}</header>
+      ${!inThread && m.topic && m.topic !== "general" ? `<a class="chip ${topicBucket(m.topic)}" ${th ? `href="${th}"` : ""}>${esc(topicLabel(m.topic))}</a>` : ""}
+      ${body}
+      ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ""}
+    </div>
+  </article>`;
 }
 
 function openPanel(mode, topic) {
@@ -963,6 +1038,13 @@ store.watchUser(u => {
   store.watchBoard((b, info) => { board = b; boardOffline = !!info.offline; refresh(); });
   store.watchMessages(list => {
     messages = list;
-    if (parseHash().parts[0] === "messages") drawFeed(parseHash().q.get("topic") || "");
+    const page = parseHash().parts[0];
+    if (page === "messages") drawFeed(parseHash().q.get("topic") || "");
+    else if (!busy && ![...document.querySelectorAll("video, audio")].some(v => !v.paused)) {
+      // a detail page only redraws its conversation; home and lists redraw for the "new" flags
+      if (parseHash().parts[1]) drawThreads();
+      else if (!page || ["production", "custom", "samples"].includes(page)) refresh();
+    }
+    updateBadge();
   });
 });
