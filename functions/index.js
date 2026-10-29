@@ -73,7 +73,8 @@ function esc(s) {
   return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
-exports.emailOnMessage = onDocumentCreated(
+// Turned on in functions/.env (EMAIL_ALERTS=on) once the BREVO_KEY secret exists.
+if (process.env.EMAIL_ALERTS === "on") exports.emailOnMessage = onDocumentCreated(
   { document: "messages/{id}", region: "asia-south1", secrets: [BREVO_KEY] },
   async event => {
     const m = event.data?.data();
