@@ -1,19 +1,17 @@
 // Email the other side whenever someone leaves a message on the board.
 //
 // Who gets emailed lives in Firestore at settings/notify (not in this public repo):
-//   { "TRUCK": ["brett@…"], "SSC": ["mansab@…", "…"], "off": false }
+//   { "from": "brett@…", "TRUCK": ["brett@…"], "SSC": ["mansab@…", "…"], "off": false }
 // A message from SSC goes to the TRUCK list and the other way round.
-// Mail is sent through the Gmail account in the MAIL_USER / MAIL_PASS secrets
-// (MAIL_PASS is a Google "app password", not the account password).
+// Mail goes out through Brevo (brevo.com); its API key is the BREVO_KEY secret, and
+// "from" must be a sender verified in the Brevo account.
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
 
 admin.initializeApp();
-const MAIL_USER = defineSecret("MAIL_USER");
-const MAIL_PASS = defineSecret("MAIL_PASS");
+const BREVO_KEY = defineSecret("BREVO_KEY");
 const SITE = "https://truck-ssc-portal.web.app/";
 
 function esc(s) {
@@ -33,7 +31,7 @@ function where(topic, board) {
 }
 
 exports.emailOnMessage = onDocumentCreated(
-  { document: "messages/{id}", region: "asia-south1", secrets: [MAIL_USER, MAIL_PASS] },
+  { document: "messages/{id}", region: "asia-south1", secrets: [BREVO_KEY] },
   async event => {
     const m = event.data?.data();
     if (!m) return;
@@ -42,7 +40,7 @@ exports.emailOnMessage = onDocumentCreated(
     const cfg = settings.exists ? settings.data() : {};
     if (cfg.off) return;
     const to = (m.org === "SSC" ? cfg.TRUCK : cfg.SSC) || [];
-    if (!to.length) { logger.info("no recipients for", m.org); return; }
+    if (!to.length || !cfg.from) { logger.info("no sender or recipients for", m.org); return; }
 
     const board = boardDoc.exists ? JSON.parse(boardDoc.data().json) : {};
     const w = where(m.topic, board);
@@ -57,8 +55,16 @@ exports.emailOnMessage = onDocumentCreated(
       <p><a href="${w.link}" style="display:inline-block;background:#BC5E3C;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:bold">Open on the board${toSSC ? " · بورڈ کھولیں" : ""}</a></p>
       <p style="font-size:13px;color:#6b6b6b">SSC × TRUCK board · reply on the board so the whole thread stays with the order.</p></div>`;
 
-    const mail = nodemailer.createTransport({ service: "gmail", auth: { user: MAIL_USER.value(), pass: MAIL_PASS.value() } });
-    await mail.sendMail({ from: `"SSC × TRUCK Board" <${MAIL_USER.value()}>`, to, subject, text, html });
+    const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": BREVO_KEY.value(), "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        sender: { name: "SSC × TRUCK Board", email: cfg.from },
+        to: to.map(email => ({ email })),
+        subject, textContent: text, htmlContent: html
+      })
+    });
+    if (!r.ok) throw new Error(`Brevo ${r.status}: ${await r.text()}`);
     logger.info("emailed", to.length, "about", event.params.id);
   }
 );
