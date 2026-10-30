@@ -965,4 +965,10 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
+// Computers (mouse, no touch) get a QR code to continue on a phone.
+const isComputer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  && !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
+if (isComputer) $('desktop-qr').classList.remove('hidden');
+$('desktop-continue').addEventListener('click', () => $('desktop-qr').classList.add('hidden'));
+
 renderReferenceChoices();
