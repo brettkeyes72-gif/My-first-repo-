@@ -336,7 +336,7 @@ html[dir="rtl"] .chip { line-height: 1.9; }
 .dp-date { border-inline-end: 1px solid var(--line-2); }
 .dp-date .k { font-family: var(--head); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--ink-3); line-height: 1.4; }
 html[dir="rtl"] .dp-date .k { font-family: "Noto Nastaliq Urdu", var(--font); text-transform: none; letter-spacing: 0; line-height: 1.9; }
-.dp-date b { font-family: var(--head); font-size: 34px; line-height: 1.05; white-space: nowrap; }
+.dp-date b { font-family: var(--head); font-size: 34px; line-height: 1.05; overflow-wrap: break-word; }
 html[dir="rtl"] .dp-date b { font-family: "Noto Nastaliq Urdu", var(--head); font-size: 26px; line-height: 1.8; }
 .dp-date i { font-style: normal; font-size: 13px; color: var(--ink-3); }
 .dp-days { align-items: center; min-width: 110px; }

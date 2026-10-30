@@ -847,6 +847,13 @@ function renderSample(id) {
       ${datePanel(s.current, "neededBy")}
     </section>
     ${stageStatus(s.stage).k === "needsOkShort" && (s.needsOKNote || s.ur?.needsOKNote) ? `<section class="todo red">${icon("alert", "big")}<div><h2>${esc(t("whatToDo"))}</h2>${textBlock(s, "needsOKNote")}</div></section>` : ""}
+    ${(() => { // the artwork / spec PDFs get big download buttons right at the top
+      const pdfs = (s.docs || []).filter(d => isPdf(d.url) && store.href(d));
+      return pdfs.length || s.drive ? `<section class="filesrow">
+        ${pdfs.map(d => fileButton({ ...d, label: t("downloadArt") }, { primary: true, sub: d.label })).join("")}
+        ${s.drive ? fileButton({ url: s.drive, label: t("googleCopy") }) : ""}
+      </section>` : "";
+    })()}
     <h2 class="sech">${esc(t("items"))}</h2>
     <div class="glovegrid">${things.map(i => `
       <article class="glovecard">
