@@ -617,3 +617,24 @@ button.text-link {
   text-transform: uppercase;
   text-decoration: none;
 }
+
+/* ---------- Computer visitors ---------- */
+
+.desktop-qr {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding: 20px;
+  background: var(--head);
+  color: #c9c9c9;
+  border-radius: 3px;
+}
+.desktop-qr img { flex: none; background: #fff; padding: 6px; border-radius: 3px; }
+.desktop-qr p { margin: 0 0 8px; font-size: 0.9rem; }
+.desktop-qr-title {
+  font: 700 1.3rem/1.2 "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+.desktop-qr .text-link { color: #fff; font-size: 0.85rem; margin: 0; }

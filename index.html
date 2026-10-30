@@ -21,6 +21,16 @@
   <main id="app">
     <!-- Step 1: pick a reference object -->
     <section class="screen" id="screen-start">
+      <!-- Shown on computers: the finder needs a phone's camera and level. -->
+      <div class="desktop-qr hidden" id="desktop-qr">
+        <img src="assets/finder-qr.svg" alt="QR code that opens the glove size finder" width="132" height="132">
+        <div>
+          <p class="desktop-qr-title">Best on your phone</p>
+          <p>Scan this with your phone's camera to measure your hand there. It needs a phone camera held over your hand.</p>
+          <button class="text-link" type="button" id="desktop-continue">Continue on this computer</button>
+        </div>
+      </div>
+
       <h1>Find your glove size</h1>
       <p class="lead">One photo of your hand with a card or coin on your palm. We'll do the measuring.</p>
       <p class="privacy">Your photo stays on your phone. It's never uploaded or saved.</p>
