@@ -1,4 +1,42 @@
-# SSC × TRUCK Board
+# TRUCK tools
+
+This repo holds two separate projects:
+
+- **[Glove Size Finder](#glove-size-finder)**: the files at the top level (`index.html`, `styles.css`, `app.js`, `assets/`). A phone page that recommends a TRUCK glove size from one photo.
+- **[SSC × TRUCK Board](#ssc--truck-board)**: everything under `public/`, `functions/` and `tools/`. The live production board shared with SSC at https://truck-ssc-portal.web.app. Claude sessions: read `CLAUDE.md` first.
+
+## Glove Size Finder
+
+A mobile web page that recommends a TRUCK glove size from one photo. The user lays their hand flat next to a credit card, ID card or coin, takes a photo from above, and drags markers onto the object and from their wrist crease to the tip of their longest finger. The known size of the object sets the scale, so the page can measure hand length and match it to the TRUCK sizing chart (sizes 3–11).
+
+Everything runs in the browser. Photos are never uploaded anywhere, and the card is pixelated as soon as it has been marked.
+
+How it works:
+
+- **Camera:** the in-app camera shows a frame with a center line for the middle finger and card. The frame turns green when the phone is flat (within 5°, smoothed), and after the phone has been level for 3 seconds (with a 3-2-1 countdown, and not in the first 2 seconds after opening) the photo takes itself. People can also tap the shutter or pick an existing photo.
+- **Marking:** pinch to zoom, drag with one finger to pan, and a zoom circle while dragging. Both measurement lines are locked vertical, so the card and hand should be lined up with the photo's center line.
+- **Sharing:** "Send to a friend" on the start screen and "Send my size" on the result open the phone's share sheet (or copy to the clipboard), so someone buying gloves as a gift can send the finder and get the size back.
+- **Hand length** runs from the tip of the longest finger to the wrist crease closest to the palm (the distal wrist crease).
+
+### Files
+
+- `index.html` – the page
+- `styles.css` – the look (colors are at the top of the file)
+- `app.js` – the measuring and sizing logic
+
+### Customizing
+
+In `app.js`:
+
+- `SIZE_CHART` – hand length in mm for each glove size, from the TRUCK sizing chart.
+- `SNAP_TO_SIZE` – how close a hand must be to a size to get that size instead of "between sizes".
+- `REFERENCES` – the objects users can pick for scale.
+
+### Trying it
+
+Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → deploy from the `main` branch) to get a link you can open on your phone.
+
+## SSC × TRUCK Board
 
 A live production board for TRUCK Gloves and SSC. It's a sister site to truckgloves.com, built so it's easy to read on a phone in Sialkot or a laptop in Salt Lake.
 
@@ -8,7 +46,7 @@ A live production board for TRUCK Gloves and SSC. It's a sister site to truckglo
 - **English / اردو button on every page.** The whole interface switches to Urdu, right-to-left in Nastaliq script. Board notes can carry their own Urdu; a note without Urdu shows in English with a small "English" tag.
 - **Messages.** Leave a **video note**, **voice note** or **text** for each other, like Marco Polo. Every PO, custom project and sample has a **Talk about this** button, so messages stay attached to the order. For a live call there is a one-tap Jitsi video call button.
 
-## Folder layout
+### Folder layout
 
 ```
 public/                 the website (plain HTML/CSS/JS, no build step)
@@ -26,13 +64,13 @@ firebase.json, firestore.rules, storage.rules
 .github/workflows/deploy.yml   auto-deploy to Firebase on push to main
 ```
 
-## Real data stays out of this repo
+### Real data stays out of this repo
 
 **This repository is public.** PO values, customer names, contacts and artwork must not be committed. `.gitignore` already blocks `public/data/board.json`, everything in `public/files/` except the demo picture, and `private/`.
 
 In live mode the real board lives in Firestore and the files live in Firebase Storage, and both sit behind sign-in.
 
-## Try it locally
+### Try it locally
 
 ```
 cd public
@@ -42,7 +80,7 @@ python3 -m http.server 8000
 
 The demo board loads by default. To see real data on your own machine, put a real `board.json` in `public/data/`. It is ignored by git.
 
-## Going live (Firebase)
+### Going live (Firebase)
 
 Firebase is Google's hosting. It loads well in Pakistan: Google has serving locations in Karachi and Lahore, and the site doesn't depend on anything that's commonly blocked there. One free Firebase project covers the website, the shared board, the messages and the video and file storage.
 
@@ -61,11 +99,11 @@ Firebase is Google's hosting. It loads well in Pakistan: Google has serving loca
    - **Upload board data:** choose the `board.json` made by `tools/sync_board.py`. Everyone's open page updates within seconds.
    - **Upload files:** type the folder (for example `files/CUS26-01/`) and pick the files. Board entries like `files/CUS26-01/PCPSPA_logo.png` then resolve to those files.
 
-### Auto-deploy from GitHub (optional)
+#### Auto-deploy from GitHub (optional)
 
 Add two repository secrets: `FIREBASE_SERVICE_ACCOUNT` (a service-account JSON key from Firebase) and `FIREBASE_PROJECT_ID`. Every push to `main` then redeploys the site. The workflow does nothing until those secrets exist.
 
-## Keeping the board current
+### Keeping the board current
 
 The Mansab Production Board is still the source. To refresh this site from it:
 
@@ -75,7 +113,7 @@ python3 tools/sync_board.py saved-board.html private/board.json --urdu private/u
 
 Then upload `private/board.json` on the Admin page. The `--urdu` overlay adds Urdu to notes and instructions; its format is described at the top of the script.
 
-### Board data format
+#### Board data format
 
 This site reads the board's own data shape, so nothing needs converting:
 
@@ -90,7 +128,7 @@ This site reads the board's own data shape, so nothing needs converting:
 
 Glove photos are matched by model and colour, for example `M1 PRO` + `Brown` → `img/gloves/m1pro-brown.jpg`. To add a model, drop in a photo and add its name to `MODEL_KEYS` / `HAVE` in `js/app.js`.
 
-## Look and icons
+### Look and icons
 
 The styling follows truckgloves.com: white pages, Oswald uppercase headings, Poppins body, square black buttons, rust accents and a near-black band for the TRUCK / SSC message panel at the top of the home page. Category colours mark each area (Production = Work rust, Custom = Snow blue, Samples = Bike charcoal, Messages = sand, Files = leather). Everything lives in `public/css/app.css`.
 
@@ -98,12 +136,12 @@ The site ships with a simple built-in line icon set. To switch to the TRUCK icon
 
 `home` `production` `custom` `samples` `messages` `files` `admin` `back` `video` `mic` `text` `download` `doc` `drive` `call` `alert` `bell` `eye` `eyeoff`
 
-## Alerts
+### Alerts
 
 - **Phone / computer alerts:** each person taps **Turn on alerts** once per device. On iPhone, add the board to the Home Screen first (Safari → Share → Add to Home Screen). The `notifyOnMessage` function in `functions/` sends an alert to everyone except the sender.
 - **Email alerts:** `emailOnMessage` sends through Brevo. It switches on once the `BREVO_KEY` secret exists and `functions/.env` has `EMAIL_ALERTS=on`. Recipients live in Firestore at `settings/notify`.
 
-## Notes for Pakistan connections
+### Notes for Pakistan connections
 
 - Fonts are self-hosted, so nothing waits on Google Fonts.
 - Pages poll gently in demo mode. Live mode uses Firestore long-polling, which copes with patchy mobile data.

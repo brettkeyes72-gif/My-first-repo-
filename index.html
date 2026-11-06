@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Glove Size Finder | TRUCK Gloves</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="https://www.truckgloves.com"><img src="assets/truck-logo-black.png" alt="TRUCK" width="500" height="90"></a>
+  </header>
+  <div class="announce">Glove Size Finder</div>
+
+  <main id="app">
+    <!-- Step 1: pick a reference object -->
+    <section class="screen" id="screen-start">
+      <h1>Find your glove size</h1>
+      <p class="lead">One photo of your hand with a card or coin on your palm. We'll do the measuring.</p>
+      <p class="privacy">Your photo stays on your phone. It's never uploaded or saved.</p>
+
+      <div class="gift">
+        <span class="step-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12"/><path d="M12 8v12.5"/><path d="M12 8C10.5 4.5 6.5 4 6.5 6.3 6.5 8 12 8 12 8zM12 8c1.5-3.5 5.5-4 5.5-1.7C17.5 8 12 8 12 8z"/></svg></span>
+        <div>
+          <p class="gift-title">Buying gloves for someone?</p>
+          <p>Send them this finder. They measure their hand and send you their size.</p>
+          <button class="btn share-btn" type="button" data-share="invite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg> Send to a friend</button>
+        </div>
+      </div>
+
+      <h2>Pick your reference</h2>
+      <div class="choices" id="reference-choices"></div>
+
+      <section class="checklist">
+        <h2>Photo checklist</h2>
+        <ol class="steps">
+          <li>
+            <span class="step-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M10 10V4a1.5 1.5 0 0 1 3 0v6.5"/><path d="M13 10.5V5a1.5 1.5 0 0 1 3 0v6"/><path d="M16 11V8a1.5 1.5 0 0 1 3 0v6.5c0 4.2-2.8 7.5-7 7.5h-.6c-2.4 0-4-1-5.4-2.9l-2.4-3.5a1.6 1.6 0 0 1 2.5-2L7 14.5"/></svg></span>
+            <div>
+              <span class="step-num">01</span>
+              <p>Lay your <strong>dominant hand palm up</strong> on a table, fingers together and pointing straight up the photo, so your wrist creases show.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7.5" y="2.5" width="9" height="14" rx="1.5"/><path d="M10 5.5h2.5v2H10z"/><path d="M3 17.5c2.4 2.6 5.3 4 9 4s6.6-1.4 9-4"/></svg></span>
+            <div>
+              <span class="step-num">02</span>
+              <p><strong>Rest the card or coin on your palm</strong>, flat, so it's at the same height as your hand. Line the card's long edge up with your middle finger.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="1.5" width="10" height="13" rx="2"/><circle cx="12" cy="8" r="2.2"/><path d="M4 21.5h16"/><path d="M9 17.5v1.5M15 17.5v1.5M12 17.5v1.5"/></svg></span>
+            <div>
+              <span class="step-num">03</span>
+              <p>Hold the phone <strong>flat, straight above</strong> your hand at about arm's length (at least 40 cm / 16 in). The frame turns green when the phone is flat, then counts down 3-2-1 and takes the photo.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <button class="btn primary file-btn" id="camera-btn" type="button">Open camera</button>
+      <label class="text-link">
+        Choose a photo instead
+        <input type="file" id="photo-input" accept="image/*">
+      </label>
+    </section>
+
+    <!-- In-app camera with framing guide and level -->
+    <section class="screen hidden" id="screen-camera">
+      <div class="camera-wrap" id="camera-wrap">
+        <video id="camera-video" playsinline muted autoplay></video>
+        <div class="camera-frame" aria-hidden="true">
+          <span class="frame-label">Fit your hand and card inside the frame</span>
+          <span class="center-line"></span>
+          <span class="center-label">Middle finger and card on this line</span>
+          <span class="capture-bar"><span id="capture-progress"></span></span>
+        </div>
+        <div class="level hidden" id="level" aria-hidden="true"><span class="level-bubble" id="level-bubble"></span></div>
+        <div class="countdown hidden" id="countdown" aria-live="polite"></div>
+      </div>
+      <p class="camera-status" id="camera-status">Starting camera…</p>
+      <div class="actions">
+        <!-- Shutter on the left: right-handed people hold the phone in their
+             left hand and press with the left thumb. -->
+        <button class="btn primary" id="shutter-btn" type="button" disabled>Take photo</button>
+        <button class="btn" id="camera-cancel" type="button">Cancel</button>
+      </div>
+    </section>
+
+    <!-- Step 2-4: place markers on the photo -->
+    <section class="screen hidden" id="screen-measure">
+      <div class="step-header">
+        <span class="step-count" id="step-count"></span>
+        <h2 id="step-title"></h2>
+        <p id="step-help"></p>
+      </div>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <canvas id="canvas"></canvas>
+        <canvas id="loupe" class="hidden" width="140" height="140"></canvas>
+        <button class="zoom-reset hidden" id="zoom-reset" type="button">Reset view</button>
+      </div>
+      <p class="zoom-hint">Pinch to zoom. Drag to move around.</p>
+      <div class="actions">
+        <button class="btn" id="back-btn">Back</button>
+        <button class="btn ghost hidden" id="skip-btn">Skip</button>
+        <button class="btn primary" id="next-btn">Next</button>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="screen hidden" id="screen-result">
+      <div class="result-head">
+        <p class="eyebrow">Your TRUCK glove size</p>
+        <div class="size-badge" id="size-label"></div>
+        <p class="size-letter" id="size-letter"></p>
+        <p class="measured" id="measured"></p>
+      </div>
+
+      <p class="note" id="result-note"></p>
+
+      <div class="share-result">
+        <button class="btn primary share-btn" type="button" data-share="result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg> Send my size</button>
+        <button class="text-link" type="button" data-share="invite">Send this finder to someone else</button>
+      </div>
+
+      <div class="shop">
+        <p class="shop-title">Shop TRUCK gloves</p>
+        <a class="btn shop-all" href="https://www.truckgloves.com/collections/all?utm_source=size-finder&amp;utm_medium=app">Shop all gloves</a>
+        <div class="shop-links">
+          <a href="https://www.truckgloves.com/collections/ski?utm_source=size-finder&amp;utm_medium=app">Snow</a>
+          <a href="https://www.truckgloves.com/collections/bike?utm_source=size-finder&amp;utm_medium=app">Bike</a>
+          <a href="https://www.truckgloves.com/collections/work?utm_source=size-finder&amp;utm_medium=app">Work</a>
+        </div>
+      </div>
+
+      <div class="chart">
+        <h2 class="chart-title">Glove sizing chart</h2>
+        <div class="ruler" id="ruler" aria-hidden="true"></div>
+        <table class="size-table">
+          <thead>
+            <tr><th scope="col">Glove size</th><th scope="col">Hand length</th></tr>
+          </thead>
+          <tbody id="size-rows"></tbody>
+        </table>
+        <p class="chart-caption">Hand length is measured from the wrist crease closest to your palm to the tip of your longest finger.</p>
+      </div>
+
+      <p class="disclaimer">This is an estimate from a photo. If it doesn't look right, tap Adjust markers and check they sit exactly on the card's edges, your fingertip and the wrist crease closest to your palm.</p>
+      <div class="actions">
+        <button class="btn" id="redo-btn">Adjust markers</button>
+        <button class="btn primary" id="restart-btn">Start over</button>
+      </div>
+    </section>
+  </main>
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
