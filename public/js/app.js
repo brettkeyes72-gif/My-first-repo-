@@ -98,10 +98,14 @@ function gloveKey(model, col) {
   const text = `${model || ""} ${col || ""}`;
   const mk = MODEL_KEYS.find(([n]) => text.toLowerCase().includes(n.toLowerCase()));
   if (!mk) return null;
-  const ck = COLOR_KEYS.find(([n]) => text.toLowerCase().includes(n.toLowerCase()));
-  const k = ck ? `${mk[1]}-${ck[1]}` : null;
-  if (k && HAVE.has(k)) return k;
-  return FALLBACK[mk[1]] || null;
+  // The colour named first wins ("Silver, … black lettering" is a silver glove),
+  // skipping colours we have no photo of for this model.
+  const low = text.toLowerCase();
+  const ck = COLOR_KEYS
+    .map(([n, slug]) => ({ slug, at: low.indexOf(n.toLowerCase()) }))
+    .filter(c => c.at >= 0 && HAVE.has(`${mk[1]}-${c.slug}`))
+    .sort((a, b) => a.at - b.at)[0];
+  return ck ? `${mk[1]}-${ck.slug}` : FALLBACK[mk[1]] || null;
 }
 function gloveSrc(model, col) {
   const k = gloveKey(model, col);
