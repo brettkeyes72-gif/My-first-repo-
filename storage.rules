@@ -1,0 +1,19 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function admin() {
+      return signedIn() && request.auth.token.email in ['brett@truckgloves.com', 'brett.keyes72@gmail.com'];
+    }
+    // PO PDFs, artwork, fonts — everyone signed in can read, only admins upload.
+    match /files/{all=**} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+    // Video and voice notes — anyone signed in, up to 60 MB each.
+    match /messages/{name} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.size < 60 * 1024 * 1024;
+    }
+  }
+}

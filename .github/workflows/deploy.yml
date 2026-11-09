@@ -1,0 +1,25 @@
+# Deploys the site to Firebase Hosting on every push to main.
+# Needs two repository secrets: FIREBASE_SERVICE_ACCOUNT (JSON key) and FIREBASE_PROJECT_ID.
+# Does nothing until those secrets exist.
+name: Deploy to Firebase Hosting
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        id: check
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: echo "ready=$([ -n "$SA" ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: steps.check.outputs.ready == 'yes'
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live

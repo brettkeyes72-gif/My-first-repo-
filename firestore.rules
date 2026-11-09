@@ -1,0 +1,27 @@
+rules_version = '2';
+// Only signed-in team members can see anything.
+// Keep the admin list in step with CONFIG.admins in public/js/config.js.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() {
+      return signedIn() && request.auth.token.email in ['brett@truckgloves.com', 'brett.keyes72@gmail.com'];
+    }
+    match /board/{doc} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+    // One Web Push subscription per device; only the server reads them.
+    match /pushsubs/{id} {
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+    match /messages/{id} {
+      allow read: if signedIn();
+      // a message is filed under the side of the login that sent it
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.org == (admin() ? 'TRUCK' : 'SSC');
+      allow delete: if admin() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+  }
+}
