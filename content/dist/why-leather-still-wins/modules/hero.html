@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hero | TRUCK Gloves</title><meta name="description" content="Wind resistance, grip, breathability, dexterity and durability: what leather does on the mountain, and the myths worth retiring.">
+<link rel="icon" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;500;600&display=swap"><style>/* TRUCK content system. Every class is prefixed tg- so a module can be dropped
+   into any page (Shopify blog, email, landing page) without style clashes.
+   Tokens match styles.css (the size finder) and truckgloves.com. */
+
+.tg-mod, .tg-page {
+  --tg-bg: #ffffff;
+  --tg-surface: #f6f6f4;
+  --tg-border: #e5e5e5;
+  --tg-text: #5c5c5c;
+  --tg-head: #171717;
+  --tg-ink: #111111;
+  --tg-rust: #c16452;
+  --tg-lime: #b4cc24;
+  --tg-cut: polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%);
+  --tg-display: "Oswald", Impact, sans-serif;
+  --tg-body: "Poppins", "Helvetica Neue", Arial, sans-serif;
+}
+
+.tg-page { margin: 0; background: var(--tg-bg); color: var(--tg-text); font: 400 16px/1.7 var(--tg-body); -webkit-text-size-adjust: 100%; }
+.tg-page *, .tg-mod * { box-sizing: border-box; }
+
+/* ---------- Module frame ---------- */
+.tg-mod { position: relative; overflow: hidden; color: var(--tg-text); font: 400 16px/1.7 var(--tg-body); background: var(--tg-bg); }
+.tg-mod[data-tone="dark"] { background: var(--tg-ink); color: #c9c9c9; }
+.tg-mod[data-tone="surface"] { background: var(--tg-surface); }
+.tg-wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 64px 20px; }
+.tg-narrow { max-width: 720px; }
+
+/* ---------- Type ---------- */
+.tg-mod h1, .tg-mod h2, .tg-mod h3, .tg-eyebrow, .tg-num {
+  font-family: var(--tg-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.01em; color: var(--tg-head);
+}
+.tg-mod[data-tone="dark"] h1, .tg-mod[data-tone="dark"] h2, .tg-mod[data-tone="dark"] h3 { color: #fff; }
+.tg-mod h1 { font-size: clamp(2.6rem, 8vw, 5.2rem); line-height: 1; margin: 0 0 18px; }
+.tg-mod h2 { font-size: clamp(1.9rem, 4.5vw, 2.9rem); line-height: 1.05; margin: 0 0 16px; }
+.tg-mod h3 { font-size: 1.25rem; line-height: 1.2; margin: 0 0 8px; }
+.tg-mod p { margin: 0 0 16px; }
+.tg-mod strong { color: var(--tg-head); font-weight: 600; }
+.tg-mod[data-tone="dark"] strong { color: #fff; }
+.tg-eyebrow { display: inline-block; margin-bottom: 14px; font-size: 0.95rem; letter-spacing: 0.14em; color: var(--tg-rust); }
+.tg-mod[data-tone="dark"] .tg-eyebrow { color: var(--tg-lime); }
+.tg-lede { font-size: 1.15rem; }
+
+/* ---------- Icon tile (the cut-corner tile used across the brand) ---------- */
+.tg-icon { flex: none; display: grid; place-items: center; width: 56px; height: 56px; background: var(--tg-lime); color: var(--tg-head); clip-path: var(--tg-cut); }
+.tg-icon svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.tg-icon--rust { background: var(--tg-rust); color: #fff; }
+
+/* ---------- Buttons ---------- */
+.tg-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 14px 28px; border: 1px solid var(--tg-head); border-radius: 3px; background: var(--tg-head); color: #fff; font: 500 0.95rem/1.2 var(--tg-body); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: background-color .15s, border-color .15s, color .15s; }
+.tg-btn:hover { background: var(--tg-rust); border-color: var(--tg-rust); }
+.tg-btn--light { background: #fff; border-color: #fff; color: var(--tg-head); }
+.tg-btn--ghost { background: transparent; color: var(--tg-head); }
+.tg-btn--ghost:hover { color: #fff; }
+
+/* ---------- Hero ---------- */
+.tg-hero { min-height: min(86vh, 760px); display: flex; align-items: flex-end; }
+.tg-hero__media { position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(17,17,17,.15) 0%, rgba(17,17,17,.92) 100%),
+  var(--tg-hero-img, none) center / cover no-repeat,
+  radial-gradient(120% 90% at 78% 20%, #3a2a25 0%, #171717 62%); }
+/* leather grain, drawn in the browser so the hero looks finished before a photo exists */
+.tg-hero__media::before { content: ""; position: absolute; inset: 0; opacity: .35; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* the angled cut from the TRUCK "A", scaled up */
+.tg-hero__media::after { content: ""; position: absolute; right: -6%; bottom: -12%; width: 52vmin; height: 52vmin; background: var(--tg-rust); opacity: .9; clip-path: var(--tg-cut); transform: rotate(0deg); }
+.tg-hero .tg-wrap { width: 100%; padding-bottom: 56px; }
+.tg-hero h1 { color: #fff; max-width: 14ch; }
+.tg-hero__meta { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 22px; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: #bdbdbd; }
+.tg-hero__meta b { color: var(--tg-lime); font-weight: 500; }
+.tg-hero .tg-lede { max-width: 46ch; color: #d6d6d6; }
+
+/* ---------- Four jobs grid ---------- */
+.tg-jobs { display: grid; gap: 16px; margin-top: 36px; grid-template-columns: 1fr; }
+.tg-job { display: flex; gap: 16px; padding: 20px; background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; }
+.tg-job h3 { margin: 0 0 4px; }
+.tg-job p { margin: 0; font-size: .95rem; }
+
+/* ---------- Benefit layout ---------- */
+.tg-benefit__grid { display: grid; gap: 36px; align-items: center; }
+.tg-num { display: block; font-size: clamp(4rem, 14vw, 7rem); line-height: .85; color: transparent !important; -webkit-text-stroke: 2px var(--tg-rust); margin-bottom: 14px; }
+.tg-mod[data-tone="dark"] .tg-num { -webkit-text-stroke-color: var(--tg-lime); }
+.tg-takeaway { display: flex; gap: 14px; align-items: flex-start; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--tg-border); font-size: .95rem; }
+.tg-mod[data-tone="dark"] .tg-takeaway { border-color: #333; }
+.tg-figure { background: var(--tg-ink); border-radius: 3px; padding: 20px; color: #fff; }
+.tg-mod[data-tone="dark"] .tg-figure { background: #1c1c1c; }
+.tg-figure svg { display: block; width: 100%; height: auto; }
+.tg-figure figcaption { margin-top: 12px; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: #9a9a9a; }
+
+/* ---------- Motion (all of it switches off for reduced-motion) ---------- */
+.tg-reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.tg-mod.is-in .tg-reveal { opacity: 1; transform: none; }
+.tg-mod.is-in .tg-reveal:nth-child(2) { transition-delay: .08s; }
+.tg-mod.is-in .tg-reveal:nth-child(3) { transition-delay: .16s; }
+.tg-mod.is-in .tg-reveal:nth-child(4) { transition-delay: .24s; }
+
+/* wind: streaks hit the leather and drop away; calm air behind it */
+.tg-wind line { stroke: #8fb0c4; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 38 120; animation: tg-wind 2.4s linear infinite; }
+.tg-wind line:nth-child(2) { animation-delay: -.5s; } .tg-wind line:nth-child(3) { animation-delay: -1s; }
+.tg-wind line:nth-child(4) { animation-delay: -1.5s; } .tg-wind line:nth-child(5) { animation-delay: -2s; }
+@keyframes tg-wind { from { stroke-dashoffset: 160; opacity: 1; } 75% { opacity: 1; } to { stroke-dashoffset: 0; opacity: 0; } }
+.tg-calm { stroke: var(--tg-lime); stroke-width: 2.5; fill: none; stroke-linecap: round; opacity: .55; }
+
+/* grip: the ring tightens onto the pole */
+.tg-grip-ring { transform-origin: 160px 110px; animation: tg-grip 3.2s ease-in-out infinite; }
+@keyframes tg-grip { 0%, 15% { transform: scale(1.5); opacity: .25; } 45%, 85% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: .25; } }
+.tg-grip-pulse { transform-origin: 160px 110px; animation: tg-pulse 3.2s ease-out infinite; }
+@keyframes tg-pulse { 0%, 40% { transform: scale(.9); opacity: 0; } 50% { opacity: .9; } 100% { transform: scale(2); opacity: 0; } }
+
+/* breathe: moisture drifts out through the shell */
+.tg-vapor circle { fill: #cfe0ea; animation: tg-vapor 3.4s ease-in infinite; opacity: 0; }
+.tg-vapor circle:nth-child(2) { animation-delay: .6s; } .tg-vapor circle:nth-child(3) { animation-delay: 1.2s; }
+.tg-vapor circle:nth-child(4) { animation-delay: 1.8s; } .tg-vapor circle:nth-child(5) { animation-delay: 2.4s; }
+@keyframes tg-vapor { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: .9; } 100% { transform: translateY(-120px); opacity: 0; } }
+
+/* dexterity: break-in slider */
+.tg-break { margin-top: 8px; }
+.tg-break input { width: 100%; accent-color: var(--tg-lime); margin: 18px 0 6px; }
+.tg-break__ticks { display: flex; justify-content: space-between; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #9a9a9a; }
+.tg-break__readout { margin: 14px 0 0; min-height: 3.2em; font-size: .95rem; color: #d9d9d9; }
+.tg-break__readout strong { color: var(--tg-lime); }
+
+/* durability: seasons fill in one after another */
+.tg-seasons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.tg-season { aspect-ratio: 1; display: grid; place-items: center; background: #262626; color: #777; font: 700 1.1rem var(--tg-display); letter-spacing: .06em; clip-path: var(--tg-cut); transition: background .4s, color .4s; }
+.tg-mod.is-in .tg-season { background: var(--tg-lime); color: var(--tg-ink); }
+.tg-mod.is-in .tg-season:nth-child(2) { transition-delay: .35s; } .tg-mod.is-in .tg-season:nth-child(3) { transition-delay: .7s; }
+.tg-mod.is-in .tg-season:nth-child(4) { transition-delay: 1.05s; } .tg-mod.is-in .tg-season:nth-child(5) { transition-delay: 1.4s; background: var(--tg-rust); color: #fff; }
+
+/* ---------- Myths ---------- */
+.tg-myths { margin-top: 28px; display: grid; gap: 10px; }
+.tg-myth { background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; }
+.tg-myth summary { display: flex; align-items: center; gap: 14px; padding: 16px 18px; cursor: pointer; list-style: none; font: 700 1.1rem var(--tg-display); text-transform: uppercase; letter-spacing: .02em; color: var(--tg-head); }
+.tg-myth summary::-webkit-details-marker { display: none; }
+.tg-myth summary::after { content: "+"; margin-left: auto; font-size: 1.6rem; line-height: 1; color: var(--tg-rust); transition: transform .2s; }
+.tg-myth[open] summary::after { transform: rotate(45deg); }
+.tg-myth[open] { border-color: var(--tg-head); box-shadow: inset 0 0 0 1px var(--tg-head); }
+.tg-myth .tg-icon { width: 44px; height: 44px; }
+.tg-myth .tg-icon svg { width: 24px; height: 24px; }
+.tg-myth__body { padding: 0 18px 6px 76px; }
+.tg-myth__body p { font-size: .97rem; }
+.tg-tag { display: inline-block; margin-right: 8px; padding: 2px 8px; background: var(--tg-rust); color: #fff; font-size: .7rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+
+/* ---------- CTA ---------- */
+.tg-cta { text-align: center; }
+.tg-cta .tg-wrap { padding: 80px 20px; }
+.tg-cta__row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
+
+/* ---------- Next reads ---------- */
+.tg-next { display: grid; gap: 14px; margin-top: 28px; }
+.tg-card { display: block; padding: 22px; background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; text-decoration: none; color: var(--tg-text); transition: border-color .15s, transform .15s; }
+a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
+.tg-card h3 { margin-top: 10px; }
+.tg-card p { margin: 0; font-size: .92rem; }
+.tg-card .tg-eyebrow { margin: 0; font-size: .8rem; }
+
+@media (min-width: 760px) {
+  .tg-wrap { padding: 96px 32px; }
+  .tg-jobs { grid-template-columns: repeat(2, 1fr); }
+  .tg-benefit__grid { grid-template-columns: 1fr 1fr; gap: 64px; }
+  .tg-benefit--flip .tg-benefit__text { order: 2; }
+  .tg-next { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-reveal { opacity: 1; transform: none; transition: none; }
+  .tg-wind line, .tg-grip-ring, .tg-grip-pulse, .tg-vapor circle { animation: none; }
+  .tg-vapor circle { opacity: .6; }
+  .tg-season { transition: none; }
+}
+</style></head><body class="tg-page"><section class="tg-mod tg-hero" data-module="hero" data-tone="dark" data-title="Hero">
+  <div class="tg-hero__media" style="--tg-hero-img:url('img/hero-leather-ski-glove.jpg')"></div>
+  <div class="tg-wrap">
+    <span class="tg-eyebrow tg-reveal">TRUCK Blog &middot; Snow</span>
+    <h1 class="tg-reveal">Why leather still wins</h1>
+    <p class="tg-lede tg-reveal">The real benefits of a leather ski glove, and what it actually does between the lift line and the last run.</p>
+    <div class="tg-hero__meta tg-reveal"><span>By <b>Brett Keyes</b></span><span>February 1, 2026</span><span>6 min read</span></div>
+  </div>
+</section><script>/* Tiny enhancer shared by every module: scroll reveal + the break-in slider.
+   Works on a full page or on a single module dropped into another page. */
+(function () {
+  var mods = document.querySelectorAll(".tg-mod");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.2 });
+    mods.forEach(function (m) { io.observe(m); });
+  } else {
+    mods.forEach(function (m) { m.classList.add("is-in"); });
+  }
+
+  document.querySelectorAll("[data-break]").forEach(function (root) {
+    var input = root.querySelector("input");
+    var out = root.querySelector(".tg-break__readout");
+    var path = root.querySelector("[data-break-path]");
+    var stops = [
+      ["Day one.", "Stiff and a little formal. The leather hasn't learned your hand yet."],
+      ["A few outings in.", "Creases settle where your knuckles bend. It starts to move with you."],
+      ["Broken in.", "Shaped to your hand. Fingertip feel for clips, zippers and straps, with no bunching to pinch circulation."]
+    ];
+    function update() {
+      var v = +input.value;
+      out.innerHTML = "<strong>" + stops[v][0] + "</strong> " + stops[v][1];
+      // finger curve relaxes as the leather conforms
+      var lift = [0, 14, 26][v];
+      if (path) path.setAttribute("d", "M40 150 L40 " + (70 + lift) + " Q40 " + (50 + lift) + " 62 " + (50 + lift) + " Q84 " + (50 + lift) + " 84 " + (70 + lift) + " L84 150");
+    }
+    input.addEventListener("input", update);
+    update();
+  });
+})();
+</script></body></html>

@@ -1,0 +1,14 @@
+{
+  "slug": "why-leather-still-wins",
+  "title": "Why Leather Still Wins: The Real Benefits of a Leather Ski Glove",
+  "description": "Wind resistance, grip, breathability, dexterity and durability: what leather does on the mountain, and the myths worth retiring.",
+  "author": "Brett Keyes",
+  "date": "February 1, 2026",
+  "readTime": "6 min read",
+  "links": {
+    "collection_url": "https://www.truckgloves.com/collections/ski-gloves",
+    "snow_url": "https://www.truckgloves.com/collections/snow",
+    "finder_url": "https://www.truckgloves.com"
+  },
+  "modules": ["hero", "jobs", "wind", "grip", "breathe", "dexterity", "durability", "myths", "cta", "next"]
+}

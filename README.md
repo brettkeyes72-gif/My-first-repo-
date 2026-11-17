@@ -28,3 +28,14 @@ In `app.js`:
 ## Trying it
 
 Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → deploy from the `main` branch) to get a link you can open on your phone.
+
+## Content pages (modular articles)
+
+`content/` holds TRUCK blog content built from small, self-contained modules in the same look as the size finder.
+
+- `content/shared/` – the brand styles (`tg-` prefixed so they never clash) and a tiny script for scroll reveal and the break-in slider
+- `content/articles/<name>/article.json` – title, byline, link targets and the module order
+- `content/articles/<name>/modules/*.html` – one file per section (hero, each benefit, myths, CTA…)
+- `content/CONTENT-PLAN.md` – the spin-off pieces planned from the pillar article
+
+Run `node content/build.mjs` to produce `content/dist/<slug>/`: the full article (`index.html`), each module as its own page (`modules/`) and as a bare fragment to embed (`fragments/`), plus `modules.json` indexing every piece.

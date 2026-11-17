@@ -1,0 +1,66 @@
+{
+  "slug": "why-leather-still-wins",
+  "title": "Why Leather Still Wins: The Real Benefits of a Leather Ski Glove",
+  "modules": [
+    {
+      "id": "hero",
+      "title": "Hero",
+      "page": "modules/hero.html",
+      "fragment": "fragments/hero.html"
+    },
+    {
+      "id": "jobs",
+      "title": "What a ski glove needs to do",
+      "page": "modules/jobs.html",
+      "fragment": "fragments/jobs.html"
+    },
+    {
+      "id": "wind",
+      "title": "Wind resistance without bulk",
+      "page": "modules/wind.html",
+      "fragment": "fragments/wind.html"
+    },
+    {
+      "id": "grip",
+      "title": "Reliable grip in cold conditions",
+      "page": "modules/grip.html",
+      "fragment": "fragments/grip.html"
+    },
+    {
+      "id": "breathe",
+      "title": "Breathability when it counts",
+      "page": "modules/breathe.html",
+      "fragment": "fragments/breathe.html"
+    },
+    {
+      "id": "dexterity",
+      "title": "Dexterity that supports circulation",
+      "page": "modules/dexterity.html",
+      "fragment": "fragments/dexterity.html"
+    },
+    {
+      "id": "durability",
+      "title": "Durability that pays off",
+      "page": "modules/durability.html",
+      "fragment": "fragments/durability.html"
+    },
+    {
+      "id": "myths",
+      "title": "Common myths about leather gloves",
+      "page": "modules/myths.html",
+      "fragment": "fragments/myths.html"
+    },
+    {
+      "id": "cta",
+      "title": "How we think about leather",
+      "page": "modules/cta.html",
+      "fragment": "fragments/cta.html"
+    },
+    {
+      "id": "next",
+      "title": "Keep reading",
+      "page": "modules/next.html",
+      "fragment": "fragments/next.html"
+    }
+  ]
+}
