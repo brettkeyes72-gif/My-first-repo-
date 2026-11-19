@@ -44,10 +44,11 @@ for (const dir of readdirSync(articlesDir)) {
     const file = join(src, "modules", `${id}.html`);
     if (!existsSync(file)) throw new Error(`Missing module: ${id}`);
     const html = fill(readFileSync(file, "utf8"), vars).trim();
+    const pageHtml = html.replaceAll("url('img/", "url('../img/"); // standalone pages live one folder down
     const title = (html.match(/data-title="([^"]*)"/) || [])[1] || id;
     writeFileSync(join(out, "fragments", `${id}.html`), html + "\n");
     writeFileSync(join(out, "modules", `${id}.html`),
-      `${head(title, meta.description, "../")}<body class="tg-page">${html}<script>${js}</script></body></html>`);
+      `${head(title, meta.description, "../")}<body class="tg-page">${pageHtml}<script>${js}</script></body></html>`);
     index.push({ id, title, page: `modules/${id}.html`, fragment: `fragments/${id}.html` });
     return html;
   });

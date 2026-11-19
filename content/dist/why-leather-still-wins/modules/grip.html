@@ -62,14 +62,13 @@
 /* ---------- Hero ---------- */
 .tg-hero { min-height: min(86vh, 760px); display: flex; align-items: flex-end; }
 .tg-hero__media { position: absolute; inset: 0; background:
-  linear-gradient(180deg, rgba(17,17,17,.15) 0%, rgba(17,17,17,.92) 100%),
-  var(--tg-hero-img, none) center / cover no-repeat,
+  linear-gradient(90deg, rgba(17,17,17,.82) 0%, rgba(17,17,17,.35) 55%, rgba(17,17,17,0) 100%),
+  linear-gradient(180deg, rgba(17,17,17,0) 55%, rgba(17,17,17,.75) 100%),
+  var(--tg-hero-img, none) center 72% / cover no-repeat,
   radial-gradient(120% 90% at 78% 20%, #3a2a25 0%, #171717 62%); }
 /* leather grain, drawn in the browser so the hero looks finished before a photo exists */
 .tg-hero__media::before { content: ""; position: absolute; inset: 0; opacity: .35; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-/* the angled cut from the TRUCK "A", scaled up */
-.tg-hero__media::after { content: ""; position: absolute; right: -6%; bottom: -12%; width: 52vmin; height: 52vmin; background: var(--tg-rust); opacity: .9; clip-path: var(--tg-cut); transform: rotate(0deg); }
 .tg-hero .tg-wrap { width: 100%; padding-bottom: 56px; }
 .tg-hero h1 { color: #fff; max-width: 14ch; }
 .tg-hero__meta { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 22px; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: #bdbdbd; }
