@@ -1,0 +1,48 @@
+{
+  "slug": "glove-care",
+  "title": "Glove Care: Washing, Drying & Conditioning",
+  "modules": [
+    {
+      "id": "hero",
+      "title": "Glove Care",
+      "page": "modules/hero.html",
+      "fragment": "fragments/hero.html"
+    },
+    {
+      "id": "chooser",
+      "title": "Pick your care video",
+      "page": "modules/chooser.html",
+      "fragment": "fragments/chooser.html"
+    },
+    {
+      "id": "video-wash",
+      "title": "Washing and drying your TRUCK gloves",
+      "page": "modules/video-wash.html",
+      "fragment": "fragments/video-wash.html"
+    },
+    {
+      "id": "video-bike",
+      "title": "Washing and applying Obenauf's to your leather bike gloves",
+      "page": "modules/video-bike.html",
+      "fragment": "fragments/video-bike.html"
+    },
+    {
+      "id": "video-obenaufs",
+      "title": "Applying Obenauf's Heavy Duty LP to your gloves",
+      "page": "modules/video-obenaufs.html",
+      "fragment": "fragments/video-obenaufs.html"
+    },
+    {
+      "id": "product",
+      "title": "Obenauf's Heavy Duty LP",
+      "page": "modules/product.html",
+      "fragment": "fragments/product.html"
+    },
+    {
+      "id": "next",
+      "title": "Keep reading",
+      "page": "modules/next.html",
+      "fragment": "fragments/next.html"
+    }
+  ]
+}

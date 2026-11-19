@@ -1,0 +1,15 @@
+{
+  "slug": "glove-care",
+  "title": "Glove Care: Washing, Drying & Conditioning",
+  "description": "Watch how to wash and dry your TRUCK gloves and how to care for leather with Obenauf's.",
+  "author": "TRUCK",
+  "date": "",
+  "readTime": "",
+  "links": {
+    "obenaufs_url": "https://www.truckgloves.com/collections/obenaufs-heavy-duty-lp",
+    "leathers_url": "https://www.truckgloves.com/pages/the-leather-breakdown",
+    "size_url": "https://www.truckgloves.com/pages/size-finder",
+    "leather_article_url": "https://www.truckgloves.com/blogs/truck-blog/why-leather-still-wins-the-real-benefits-of-a-leather-ski-glove"
+  },
+  "modules": ["hero", "chooser", "video-wash", "video-bike", "video-obenaufs", "product", "next"]
+}

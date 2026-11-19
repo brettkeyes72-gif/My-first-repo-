@@ -75,10 +75,19 @@
 .tg-hero__meta b { color: var(--tg-lime); font-weight: 500; }
 .tg-hero .tg-lede { max-width: 46ch; color: #d6d6d6; }
 
+/* ---------- Split hero (text + cut-corner photo) ---------- */
+.tg-hero--split { min-height: 0; }
+.tg-hero--split .tg-wrap { padding-top: 72px; }
+.tg-split { display: grid; gap: 32px; align-items: center; }
+.tg-cut-photo { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; background: #fff; clip-path: polygon(0 0, 100% 0, 100% 86%, 86% 100%, 0 100%); }
+
 /* ---------- Four jobs grid ---------- */
 .tg-jobs { display: grid; gap: 16px; margin-top: 36px; grid-template-columns: 1fr; }
 .tg-job { display: flex; gap: 16px; padding: 20px; background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; }
 .tg-job h3 { margin: 0 0 4px; }
+a.tg-job { text-decoration: none; color: inherit; transition: border-color .15s, transform .15s; }
+a.tg-job:hover { border-color: var(--tg-head); transform: translateY(-2px); }
+.tg-jobs.tg-jobs--three { grid-template-columns: 1fr; }
 .tg-job p { margin: 0; font-size: .95rem; }
 
 /* ---------- Benefit layout ---------- */
@@ -164,6 +173,17 @@
   .tg-xs-copy { grid-column: 1; }
 }
 
+/* ---------- Video (loads YouTube only on click) ---------- */
+.tg-video { position: relative; aspect-ratio: 16 / 9; background: var(--tg-ink); border-radius: 3px; overflow: hidden; }
+.tg-mod[data-tone="dark"] .tg-video { background: #1c1c1c; }
+.tg-video a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #fff; text-decoration: none; background: radial-gradient(90% 90% at 70% 20%, #3a2a25 0%, #171717 70%); }
+.tg-video__play { display: grid; place-items: center; width: 76px; height: 76px; background: var(--tg-lime); color: var(--tg-ink); clip-path: var(--tg-cut); transition: transform .2s; }
+.tg-video a:hover .tg-video__play { transform: scale(1.08); }
+.tg-video__play svg { width: 34px; height: 34px; fill: currentColor; margin-left: 4px; }
+.tg-video__label { font: 500 .8rem/1 var(--tg-body); letter-spacing: .14em; text-transform: uppercase; }
+.tg-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.tg-product-img { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; background: #fff; border-radius: 3px; }
+
 /* ---------- Myths ---------- */
 .tg-myths { margin-top: 28px; display: grid; gap: 10px; }
 .tg-myth { background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; }
@@ -195,6 +215,8 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
 .tg-card .tg-eyebrow { margin: 0; font-size: .8rem; }
 
 @media (min-width: 760px) {
+  .tg-split { grid-template-columns: 1.1fr .9fr; gap: 64px; }
+  .tg-jobs.tg-jobs--three { grid-template-columns: repeat(3, 1fr); }
   .tg-wrap { padding: 96px 32px; }
   .tg-jobs { grid-template-columns: repeat(2, 1fr); }
   .tg-benefit__grid { grid-template-columns: 1fr 1fr; gap: 64px; }
@@ -264,6 +286,20 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
         buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
         panels.forEach(function (p) { p.hidden = p.getAttribute("data-for") !== layer; });
       });
+    });
+  });
+
+  document.querySelectorAll("[data-video]").forEach(function (box) {
+    var link = box.querySelector("a");
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      var f = document.createElement("iframe");
+      f.src = "https://www.youtube-nocookie.com/embed/" + box.getAttribute("data-video") + "?autoplay=1&rel=0";
+      f.title = link.getAttribute("aria-label").replace("Play video: ", "");
+      f.allow = "autoplay; encrypted-media; picture-in-picture";
+      f.allowFullscreen = true;
+      box.innerHTML = "";
+      box.appendChild(f);
     });
   });
 })();

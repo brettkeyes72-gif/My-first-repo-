@@ -46,4 +46,18 @@
       });
     });
   });
+
+  document.querySelectorAll("[data-video]").forEach(function (box) {
+    var link = box.querySelector("a");
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      var f = document.createElement("iframe");
+      f.src = "https://www.youtube-nocookie.com/embed/" + box.getAttribute("data-video") + "?autoplay=1&rel=0";
+      f.title = link.getAttribute("aria-label").replace("Play video: ", "");
+      f.allow = "autoplay; encrypted-media; picture-in-picture";
+      f.allowFullscreen = true;
+      box.innerHTML = "";
+      box.appendChild(f);
+    });
+  });
 })();
