@@ -134,6 +134,8 @@
 
 .tg-photo { display: block; width: 100%; height: auto; max-height: 420px; object-fit: contain; margin-top: 20px; background: #fff; border-radius: 3px; }
 
+.tg-photo--cover { object-fit: cover; aspect-ratio: 16 / 10; max-height: none; background: none; }
+
 /* ---------- Leather cross-section ---------- */
 .tg-xs-wrap { margin-top: 36px; display: grid; gap: 20px; }
 .tg-xs-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -178,7 +180,10 @@
 
 /* ---------- CTA ---------- */
 .tg-cta { text-align: center; }
-.tg-cta .tg-wrap { padding: 80px 20px; }
+.tg-cta .tg-wrap { padding: 120px 20px; }
+.tg-cta__media { position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(17,17,17,.55) 0%, rgba(17,17,17,.78) 100%),
+  var(--tg-cta-img, none) center 27% / cover no-repeat, var(--tg-ink); }
 .tg-cta__row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
 
 /* ---------- Next reads ---------- */
@@ -286,6 +291,7 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
         <path class="tg-calm" d="M205 70q25-14 50 0t50 0M205 110q25-14 50 0t50 0M205 150q25-14 50 0t50 0"/>
       </svg>
       <figcaption>Wind stops at the leather. Calm air behind it.</figcaption>
+      <img class="tg-photo tg-photo--cover" src="img/wind-birch-snowfall.jpg" alt="Two skiers touring through falling snow between birch trees" loading="lazy" width="1200" height="1200">
     </figure>
   </div>
 </section>
@@ -305,6 +311,7 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
         <g class="tg-grip-ring"><rect x="128" y="84" width="64" height="52" rx="14" fill="#c16452"/><path d="M138 100h44M138 110h44M138 120h44" stroke="#171717" stroke-opacity=".3" stroke-width="2"/></g>
       </svg>
       <figcaption>Contact you can feel and hold</figcaption>
+      <img class="tg-photo tg-photo--cover" src="img/grip-powder-skier.jpg" alt="A skier carving through deep powder with a pole planted" loading="lazy" width="1200" height="1200">
     </figure>
   </div>
 </section>
@@ -380,6 +387,7 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
   </div>
 </section>
 <section class="tg-mod tg-cta" data-module="cta" data-tone="dark" data-title="How we think about leather">
+  <div class="tg-cta__media" style="--tg-cta-img:url('img/cta-ice-cave-skier.jpg')"></div>
   <div class="tg-wrap tg-narrow">
     <span class="tg-eyebrow">How we think about leather at TRUCK</span>
     <h2>Built to work. Built to last.</h2>
