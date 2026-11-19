@@ -15,6 +15,12 @@
       "fragment": "fragments/jobs.html"
     },
     {
+      "id": "structure",
+      "title": "Inside the leather",
+      "page": "modules/structure.html",
+      "fragment": "fragments/structure.html"
+    },
+    {
       "id": "wind",
       "title": "Wind resistance without bulk",
       "page": "modules/wind.html",

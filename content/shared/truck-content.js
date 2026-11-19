@@ -32,4 +32,18 @@
     input.addEventListener("input", update);
     update();
   });
+
+  document.querySelectorAll("[data-xs]").forEach(function (root) {
+    var buttons = root.querySelectorAll("[data-layer]");
+    var panels = root.querySelectorAll("[data-for]");
+    var svg = root.querySelector(".tg-xs");
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var layer = b.getAttribute("data-layer");
+        svg.setAttribute("data-active", layer);
+        buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+        panels.forEach(function (p) { p.hidden = p.getAttribute("data-for") !== layer; });
+      });
+    });
+  });
 })();

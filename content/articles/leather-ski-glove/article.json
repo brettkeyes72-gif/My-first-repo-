@@ -10,5 +10,5 @@
     "snow_url": "https://www.truckgloves.com/collections/snow",
     "finder_url": "https://www.truckgloves.com"
   },
-  "modules": ["hero", "jobs", "wind", "grip", "breathe", "dexterity", "durability", "myths", "cta", "next"]
+  "modules": ["hero", "jobs", "structure", "wind", "grip", "breathe", "dexterity", "durability", "myths", "cta", "next"]
 }
