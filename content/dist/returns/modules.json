@@ -1,0 +1,42 @@
+{
+  "slug": "returns",
+  "title": "Returns & Exchanges",
+  "modules": [
+    {
+      "id": "hero",
+      "title": "Returns & Exchanges",
+      "page": "modules/hero.html",
+      "fragment": "fragments/hero.html"
+    },
+    {
+      "id": "facts",
+      "title": "Return windows",
+      "page": "modules/facts.html",
+      "fragment": "fragments/facts.html"
+    },
+    {
+      "id": "rules",
+      "title": "The details",
+      "page": "modules/rules.html",
+      "fragment": "fragments/rules.html"
+    },
+    {
+      "id": "start",
+      "title": "Start a return or exchange",
+      "page": "modules/start.html",
+      "fragment": "fragments/start.html"
+    },
+    {
+      "id": "help",
+      "title": "Need a hand?",
+      "page": "modules/help.html",
+      "fragment": "fragments/help.html"
+    },
+    {
+      "id": "next",
+      "title": "Related help",
+      "page": "modules/next.html",
+      "fragment": "fragments/next.html"
+    }
+  ]
+}

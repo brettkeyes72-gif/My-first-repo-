@@ -1,0 +1,16 @@
+{
+  "slug": "returns",
+  "title": "Returns & Exchanges",
+  "description": "Start a return or exchange: 90 days for a full refund, one year for store credit or exchange.",
+  "author": "TRUCK",
+  "date": "",
+  "readTime": "",
+  "links": {
+    "policy_url": "https://www.truckgloves.com/pages/returns-policy",
+    "fieldtest_url": "https://www.truckgloves.com/pages/field-test",
+    "portal_url": "https://app.shiphero.com/returns/73241/?language=en",
+    "size_url": "https://www.truckgloves.com/pages/size-finder",
+    "shipping_url": "https://www.truckgloves.com/pages/shipping"
+  },
+  "modules": ["hero", "facts", "rules", "start", "help", "next"]
+}

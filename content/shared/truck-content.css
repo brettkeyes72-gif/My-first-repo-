@@ -178,6 +178,21 @@ a.tg-job:hover { border-color: var(--tg-head); transform: translateY(-2px); }
 .tg-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .tg-product-img { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; background: #fff; border-radius: 3px; }
 
+/* ---------- Key facts ---------- */
+.tg-facts { display: grid; gap: 14px; }
+.tg-fact { padding: 26px 24px; background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; clip-path: polygon(0 0, 100% 0, 100% 88%, 94% 100%, 0 100%); }
+.tg-fact__num { font: 700 clamp(3.4rem, 9vw, 5rem)/.9 var(--tg-display); text-transform: uppercase; color: var(--tg-rust); }
+.tg-fact__unit { margin-left: 8px; font: 700 1.4rem var(--tg-display); text-transform: uppercase; color: var(--tg-head); }
+.tg-fact p { margin: 8px 0 0; }
+.tg-fine { margin: 22px 0 0; font-size: .9rem; }
+.tg-fine a, .tg-job a, .tg-mod a:not([class]) { color: var(--tg-rust); }
+.tg-mod[data-tone="dark"] .tg-fine a { color: var(--tg-lime); }
+
+/* ---------- Embedded form ---------- */
+.tg-embed { position: relative; margin-top: 32px; min-height: 900px; background: #fff; border-radius: 3px; overflow: hidden; }
+.tg-embed__fallback { position: absolute; inset: 0; margin: 0; padding: 40px 24px; text-align: center; color: var(--tg-text); }
+.tg-embed iframe { position: relative; display: block; width: 100%; height: 900px; border: 0; background: transparent; }
+
 /* ---------- Myths ---------- */
 .tg-myths { margin-top: 28px; display: grid; gap: 10px; }
 .tg-myth { background: #fff; border: 1px solid var(--tg-border); border-radius: 3px; }
@@ -209,6 +224,7 @@ a.tg-card:hover { border-color: var(--tg-head); transform: translateY(-2px); }
 .tg-card .tg-eyebrow { margin: 0; font-size: .8rem; }
 
 @media (min-width: 760px) {
+  .tg-facts { grid-template-columns: repeat(3, 1fr); }
   .tg-split { grid-template-columns: 1.1fr .9fr; gap: 64px; }
   .tg-jobs.tg-jobs--three { grid-template-columns: repeat(3, 1fr); }
   .tg-wrap { padding: 96px 32px; }

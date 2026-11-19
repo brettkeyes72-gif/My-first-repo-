@@ -37,6 +37,7 @@ Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → 
 - `content/articles/<name>/article.json` – title, byline, link targets and the module order
 - `content/articles/<name>/modules/*.html` – one file per section (hero, each benefit, myths, CTA…)
 - `content/articles/glove-care/` – the redesigned Glove Care page (three videos, shown with click-to-play so YouTube loads only on demand)
+- `content/articles/returns/` – the Returns & Exchanges page (terms kept word-for-word from the live page, with the ShipHero returns form embedded)
 - `content/CONTENT-PLAN.md` – the spin-off pieces planned from the pillar article
 
 Run `node content/build.mjs` to produce `content/dist/<slug>/`: the full article (`index.html`), each module as its own page (`modules/`) and as a bare fragment to embed (`fragments/`), plus `modules.json` indexing every piece.
