@@ -10,5 +10,24 @@
     "snow_url": "https://www.truckgloves.com/collections/snow",
     "finder_url": "https://www.truckgloves.com"
   },
-  "modules": ["hero", "jobs", "structure", "wind", "grip", "breathe", "dexterity", "durability", "myths", "cta", "next"]
+  "modules": [
+    "hero",
+    "jobs",
+    "structure",
+    "wind",
+    "grip",
+    "breathe",
+    "dexterity",
+    "durability",
+    "myths",
+    "cta",
+    "next"
+  ],
+  "cdn": {
+    "img/hero-leather-ski-glove.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-hero.jpg?v=1795294643",
+    "img/cta-ice-cave-skier.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-cta-ice-cave.jpg?v=1795294643",
+    "img/grip-powder-skier.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-grip-powder.jpg?v=1795294643",
+    "img/wind-birch-snowfall.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-wind-birch.jpg?v=1795294643",
+    "img/leather-glove-detail.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-glove-detail.jpg?v=1795294643"
+  }
 }

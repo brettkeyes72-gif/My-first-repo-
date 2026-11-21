@@ -53,6 +53,21 @@ for (const dir of readdirSync(articlesDir)) {
     return html;
   });
 
+  // Shopify build: one self-contained block (no site header; images on the store CDN) for pasting into a blog article body.
+  if (meta.cdn) {
+    let body = parts.join("\n").replace(/<h1/g, '<h2 class="tg-h1"').replace(/<\/h1>/g, "</h2>");
+    for (const [from, to] of Object.entries(meta.cdn)) body = body.replaceAll(from, to);
+    const left = body.match(/(?:src="|url\(')img\/[^"')]*/g);
+    if (left) throw new Error("Unmapped images for Shopify build: " + left.join(", "));
+    // Shared styles/script as standalone files to upload once; the article body then only links to them.
+    writeFileSync(join(out, "shopify.css"), `@import url("${fonts}");${css}`);
+    writeFileSync(join(out, "shopify.js"), js);
+    const a = meta.assets || {};
+    const style = a.css ? `<link rel="stylesheet" href="${a.css}">` : `<style>@import url("${fonts}");${css}</style>`;
+    const script = a.js ? `<script src="${a.js}" defer></script>` : `<script>${js}</script>`;
+    writeFileSync(join(out, "shopify.html"), `${style}\n<div class="tg-page tg-bleed">${body}</div>\n${script}\n`);
+  }
+
   writeFileSync(join(out, "modules.json"), JSON.stringify({ slug: meta.slug, title: meta.title, modules: index }, null, 2));
   writeFileSync(join(out, "index.html"),
     `${head(meta.title, meta.description, "")}<body class="tg-page">${header("")}${parts.join("\n")}<script>${js}</script></body></html>`);
