@@ -41,3 +41,13 @@ Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → 
 - `content/CONTENT-PLAN.md` – the spin-off pieces planned from the pillar article
 
 Run `node content/build.mjs` to produce `content/dist/<slug>/`: the full article (`index.html`), each module as its own page (`modules/`) and as a bare fragment to embed (`fragments/`), plus `modules.json` indexing every piece.
+
+### Publishing to Shopify
+
+`node content/build.mjs` also writes `content/dist/<slug>/shopify.html`, `shopify.css` and `shopify.js` for articles that define `cdn` (image URLs) in `article.json`.
+
+1. Upload images, `shopify.css` and `shopify.js` to the store's **Files** (the Admin API `fileCreate` takes a public URL; use a URL pinned to a commit SHA, since branch URLs can be served stale by GitHub's cache).
+2. Put the resulting CDN URLs in `article.json` under `cdn` (images) and `assets` (css/js), then rebuild.
+3. Create the article (unpublished first) with `shopify.html` as the body.
+
+Current state: the leather article exists in TRUCK BLOG as an **unpublished draft** (handle `why-leather-still-wins-redesign-draft`). The live article is untouched. Uploaded filenames are versioned (`tg-content-v4.js` is current); change the version number whenever the css/js changes.
