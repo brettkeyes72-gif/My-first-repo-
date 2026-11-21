@@ -55,7 +55,7 @@ for (const dir of readdirSync(articlesDir)) {
 
   // Shopify build: one self-contained block (no site header; images on the store CDN) for pasting into a blog article body.
   if (meta.cdn) {
-    let body = parts.join("\n").replace(/<h1/g, '<h2 class="tg-h1"').replace(/<\/h1>/g, "</h2>");
+    let body = parts.join("\n").replace(/<h1 class="([^"]*)"/g, '<h2 class="tg-h1 $1"').replace(/<h1>/g, '<h2 class="tg-h1">').replace(/<\/h1>/g, "</h2>");
     for (const [from, to] of Object.entries(meta.cdn)) body = body.replaceAll(from, to);
     const left = body.match(/(?:src="|url\(')img\/[^"')]*/g);
     if (left) throw new Error("Unmapped images for Shopify build: " + left.join(", "));

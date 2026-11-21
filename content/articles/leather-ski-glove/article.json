@@ -6,9 +6,9 @@
   "date": "February 1, 2026",
   "readTime": "6 min read",
   "links": {
-    "collection_url": "https://www.truckgloves.com/collections/ski-gloves",
-    "snow_url": "https://www.truckgloves.com/collections/snow",
-    "finder_url": "https://www.truckgloves.com"
+    "collection_url": "https://www.truckgloves.com/collections/ski",
+    "snow_url": "https://www.truckgloves.com/pages/snow-lineup",
+    "finder_url": "https://www.truckgloves.com/pages/size-finder"
   },
   "modules": [
     "hero",
@@ -29,5 +29,9 @@
     "img/grip-powder-skier.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-grip-powder.jpg?v=1795294643",
     "img/wind-birch-snowfall.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-wind-birch.jpg?v=1795294643",
     "img/leather-glove-detail.jpg": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-leather-glove-detail.jpg?v=1795294643"
+  },
+  "assets": {
+    "css": "https://cdn.shopify.com/s/files/1/1025/2603/files/tg-content-v1.css?v=1795297942",
+    "js": "PENDING"
   }
 }
